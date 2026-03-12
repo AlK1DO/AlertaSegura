@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="24dp"
-    android:background="@color/white">
+    android:background="@color/surface_dark">
 
     <!-- Logo / Título -->
     <TextView
@@ -16,7 +16,7 @@
         android:text="🛡️ Alerta Segura"
         android:textSize="28sp"
         android:textStyle="bold"
-        android:textColor="#1A3A5C"
+        android:textColor="#FFFFFF"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -28,7 +28,7 @@
         android:layout_height="wrap_content"
         android:text="Inicia sesión para continuar"
         android:textSize="16sp"
-        android:textColor="#666666"
+        android:textColor="#B0BEC5"
         app:layout_constraintTop_toBottomOf="@id/tvTitle"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -50,8 +50,9 @@
             android:id="@+id/etEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textEmailAddress"
-            android:imeOptions="actionNext"/>
+            android:background="#FFFFFF"
+            android:imeOptions="actionNext"
+            android:inputType="textEmailAddress" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Contraseña -->
@@ -71,8 +72,9 @@
             android:id="@+id/etPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textPassword"
-            android:imeOptions="actionDone"/>
+            android:background="#FFFFFF"
+            android:imeOptions="actionDone"
+            android:inputType="textPassword" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- ProgressBar -->

@@ -2,4 +2,12 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="panic_red">#C62828</color>
+    <color name="panic_red_light">#EF5350</color>
+    <color name="surface_dark">#1A1A2E</color>
+    <color name="card_dark">#16213E</color>
+    <color name="accent">#0F3460</color>
+    <color name="text_primary">#EEEEEE</color>
+    <color name="text_secondary">#B0BEC5</color>
+    <color name="selected_green">#2E7D32</color>
 </resources>

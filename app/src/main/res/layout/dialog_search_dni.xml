@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
+    android:background="#1A1A2E"
     android:padding="24dp">
 
     <TextView
@@ -12,7 +13,7 @@
         android:layout_height="wrap_content"
         android:text="Ingresa el DNI de 8 dígitos de la persona que quieres agregar."
         android:textSize="14sp"
-        android:textColor="#555555"
+        android:textColor="#FFFFFF"
         android:layout_marginBottom="16dp"/>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -25,9 +26,10 @@
             android:id="@+id/etDniSearch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="#FFFFFF"
+            android:imeOptions="actionSearch"
             android:inputType="number"
-            android:maxLength="8"
-            android:imeOptions="actionSearch"/>
+            android:maxLength="8" />
 
     </com.google.android.material.textfield.TextInputLayout>
 

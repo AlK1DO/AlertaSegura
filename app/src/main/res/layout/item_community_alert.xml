@@ -8,7 +8,7 @@
     android:layout_marginBottom="10dp"
     app:cardCornerRadius="12dp"
     app:cardElevation="3dp"
-    app:cardBackgroundColor="#FFF3F3">
+    app:cardBackgroundColor="#1A1A2E">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -50,7 +50,7 @@
             android:layout_height="wrap_content"
             android:text="DNI: ****5678"
             android:textSize="12sp"
-            android:textColor="#666666"
+            android:textColor="#FFFFFF"
             android:layout_marginTop="4dp"/>
 
         <!-- Ubicación aproximada -->
@@ -60,7 +60,7 @@
             android:layout_height="wrap_content"
             android:text="📍 Aprox. -12.0123, -77.0456"
             android:textSize="12sp"
-            android:textColor="#444444"
+            android:textColor="#FFFFFF"
             android:layout_marginTop="4dp"/>
 
     </LinearLayout>

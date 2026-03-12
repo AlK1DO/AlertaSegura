@@ -5,7 +5,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F7FA">
+    android:background="#1A1A2E">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -20,7 +20,7 @@
             android:text="Contactos de confianza"
             android:textSize="22sp"
             android:textStyle="bold"
-            android:textColor="#1A3A5C"
+            android:textColor="#FFFFFF"
             android:layout_marginTop="32dp"
             android:layout_marginStart="24dp"/>
 
@@ -29,7 +29,7 @@
             android:layout_height="wrap_content"
             android:text="Recibirán tu ubicación exacta cuando actives una alerta SOS."
             android:textSize="13sp"
-            android:textColor="#888888"
+            android:textColor="#B0BEC5"
             android:layout_marginStart="24dp"
             android:layout_marginEnd="24dp"
             android:layout_marginTop="4dp"
@@ -42,7 +42,7 @@
             android:layout_height="wrap_content"
             android:text="Aún no tienes contactos de emergencia.\nBusca a tus amigos abajo 👇"
             android:textSize="14sp"
-            android:textColor="#AAAAAA"
+            android:textColor="#FFFFFF"
             android:gravity="center"
             android:padding="24dp"
             android:visibility="gone"/>
@@ -92,7 +92,7 @@
                     android:text="Tus contactos en Alerta Segura"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    android:textColor="#1A3A5C"/>
+                    android:textColor="#FFFFFF"/>
 
                 <!-- Spinner de carga del sync -->
                 <ProgressBar
