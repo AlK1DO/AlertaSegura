@@ -11,10 +11,12 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
+import com.example.alertasegura.R;
 import com.example.alertasegura.databinding.FragmentRegisterBinding;
 import com.example.alertasegura.ui.main.MainActivity;
 import com.example.alertasegura.viewmodel.AuthViewModel;
@@ -39,10 +41,9 @@ public class RegisterFragment extends Fragment {
         // Inicializa el ViewModel compartido con la Activity
         authViewModel = new ViewModelProvider(requireActivity()).get(AuthViewModel.class);
 
-        // Observa el éxito del registro para navegar a la pantalla principal
+        // Registro exitoso → apagar loading e ir a MainActivity
         authViewModel.registeredUserLiveData.observe(getViewLifecycleOwner(), user -> {
             if (user != null) {
-                android.util.Log.d("DEBUG", "Registro exitoso: " + user.getFullName());
                 setLoading(false);
                 Intent intent = new Intent(requireActivity(), MainActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -50,17 +51,25 @@ public class RegisterFragment extends Fragment {
             }
         });
 
-        // Observa errores y los muestra mediante un Snackbar
+        // Error → apagar loading y mostrar mensaje
         authViewModel.errorLiveData.observe(getViewLifecycleOwner(), error -> {
             if (error != null && !error.isEmpty()) {
-                android.util.Log.e("DEBUG", "Error detectado: " + error);
                 setLoading(false);
                 Snackbar.make(binding.getRoot(), error, Snackbar.LENGTH_LONG).show();
-                authViewModel.errorLiveData.setValue(null); // Limpia el error tras mostrarlo
+                authViewModel.errorLiveData.setValue(null); // limpiar
             }
         });
 
-        // Configura el botón de registro con validaciones previas
+        // Abre el diálogo con los Términos y Condiciones completos
+        binding.tvTermsLink.setOnClickListener(v ->
+                new AlertDialog.Builder(requireContext())
+                        .setTitle(getString(R.string.terms_and_conditions_title))
+                        .setMessage(getString(R.string.terms_full_text))
+                        .setPositiveButton("Cerrar", null)
+                        .show()
+        );
+
+        // Botón registrar
         binding.btnRegister.setOnClickListener(v -> {
             String fullName        = binding.etFullName.getText().toString().trim();
             String dni             = binding.etDni.getText().toString().trim();
@@ -75,7 +84,7 @@ public class RegisterFragment extends Fragment {
             }
         });
 
-        // Navegación hacia atrás para volver al Login
+        // Ir a login
         binding.tvGoToLogin.setOnClickListener(v ->
                 Navigation.findNavController(view).navigateUp()
         );
@@ -125,6 +134,14 @@ public class RegisterFragment extends Fragment {
             return false;
         }
         binding.tilConfirmPassword.setError(null);
+
+        // Verifica que el usuario haya aceptado los Términos y Condiciones
+        if (!binding.cbTerms.isChecked()) {
+            Snackbar.make(binding.getRoot(),
+                    getString(R.string.terms_error),
+                    Snackbar.LENGTH_LONG).show();
+            return false;
+        }
 
         return true;
     }
