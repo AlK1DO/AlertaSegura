@@ -9,7 +9,7 @@
 
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.alertasegura.ui.auth.LoginFragment"
+        android:name="com.example.alertasegura.ui.auth.LoginFragment"
         android:label="Login">
         <action
             android:id="@+id/action_login_to_register"
@@ -18,7 +18,7 @@
 
     <fragment
         android:id="@+id/registerFragment"
-        android:name="com.alertasegura.ui.auth.RegisterFragment"
+        android:name="com.example.alertasegura.ui.auth.RegisterFragment"
         android:label="Registro"/>
 
 </navigation>
