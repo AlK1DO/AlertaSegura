@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- AndroidManifest.xml — ACTUALIZADO con Google Maps meta-data -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -15,6 +16,14 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AlertaSegura">
+
+        <!--
+            ⚠️  IMPORTANTE: Reemplaza "YOUR_GOOGLE_MAPS_API_KEY" con tu clave real
+            obtenida en https://console.cloud.google.com → Maps SDK for Android
+        -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="YOUR_GOOGLE_MAPS_API_KEY"/>
 
         <activity
             android:name=".ui.SplashActivity"

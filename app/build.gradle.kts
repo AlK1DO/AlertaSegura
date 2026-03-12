@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.example.alertasegura"
-    compileSdk = 35  // ← corregido, la sintaxis que tenías era inválida
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.alertasegura"
@@ -47,12 +47,17 @@ dependencies {
     implementation(libs.lifecycle.livedata.ktx)
     implementation(libs.lifecycle.viewmodel.ktx)
 
-    // Firebase BOM — controla todas las versiones automáticamente
+    // Firebase BOM
     implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-messaging")
     implementation("com.google.firebase:firebase-database")
+
+    // Google Maps + Heatmap
+    implementation("com.google.android.gms:play-services-maps:19.0.0")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+    implementation("com.google.maps.android:android-maps-utils:3.8.2")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
