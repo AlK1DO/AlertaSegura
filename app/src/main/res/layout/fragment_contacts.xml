@@ -1,82 +1,144 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- res/layout/fragment_contacts.xml -->
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F5F7FA">
 
-    <!-- Encabezado -->
-    <TextView
-        android:id="@+id/tvTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Contactos de confianza"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:textColor="#1A3A5C"
-        android:layout_marginTop="32dp"
-        android:layout_marginStart="24dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
-
-    <TextView
-        android:id="@+id/tvSubtitle"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Serán notificados cuando actives una alerta SOS"
-        android:textSize="13sp"
-        android:textColor="#888888"
-        android:layout_marginStart="24dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginTop="4dp"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-    <!-- Estado vacío -->
-    <TextView
-        android:id="@+id/tvEmptyState"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="👥  Aún no tienes contactos.\nPresiona + para agregar."
-        android:textSize="16sp"
-        android:textColor="#AAAAAA"
-        android:gravity="center"
-        android:visibility="gone"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-    <!-- Lista de contactos -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvContacts"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="12dp"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="80dp"
-        android:clipToPadding="false"
-        app:layout_constraintTop_toBottomOf="@id/tvSubtitle"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-    <!-- FAB agregar contacto -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabAddContact"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="24dp"
-        android:contentDescription="Agregar contacto"
-        android:src="@android:drawable/ic_input_add"
-        app:backgroundTint="#1A3A5C"
-        app:tint="@color/white"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        android:orientation="vertical"
+        android:paddingBottom="32dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <!-- ── Encabezado ───────────────────────────────────── -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Contactos de confianza"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="#1A3A5C"
+            android:layout_marginTop="32dp"
+            android:layout_marginStart="24dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Recibirán tu ubicación exacta cuando actives una alerta SOS."
+            android:textSize="13sp"
+            android:textColor="#888888"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- ── Estado vacío ─────────────────────────────────── -->
+        <TextView
+            android:id="@+id/tvEmptyState"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Aún no tienes contactos de emergencia.\nBusca a tus amigos abajo 👇"
+            android:textSize="14sp"
+            android:textColor="#AAAAAA"
+            android:gravity="center"
+            android:padding="24dp"
+            android:visibility="gone"/>
+
+        <!-- ── Lista contactos guardados ────────────────────── -->
+        <!-- NestedScrollView + RecyclerView: usar wrap_content + nestedScrollingEnabled=false -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvContacts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:nestedScrollingEnabled="false"
+            android:clipToPadding="false"/>
+
+        <!-- ── Divisor ───────────────────────────────────────── -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp"/>
+
+        <!-- ── Sección: Amigos en Alerta Segura ─────────────── -->
+        <LinearLayout
+            android:id="@+id/layoutSuggestions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Tus contactos en Alerta Segura"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#1A3A5C"/>
+
+                <!-- Spinner de carga del sync -->
+                <ProgressBar
+                    android:id="@+id/progressSync"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:visibility="gone"/>
+
+            </LinearLayout>
+
+            <!-- Botón para dar permiso si no lo tiene -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnGrantContacts"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:text="Permitir acceso a contactos"
+                android:textSize="14sp"
+                app:backgroundTint="#1A3A5C"
+                android:visibility="gone"/>
+
+            <!-- Mensaje si no hay coincidencias -->
+            <TextView
+                android:id="@+id/tvNoMatches"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Ninguno de tus contactos usa Alerta Segura todavía."
+                android:textSize="14sp"
+                android:textColor="#AAAAAA"
+                android:gravity="center"
+                android:padding="16dp"
+                android:visibility="gone"/>
+
+            <!-- Lista de sugerencias del teléfono -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvPhoneMatches"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:nestedScrollingEnabled="false"
+                android:clipToPadding="false"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

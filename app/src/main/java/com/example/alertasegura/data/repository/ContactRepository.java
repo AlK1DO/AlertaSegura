@@ -1,3 +1,4 @@
+
 package com.example.alertasegura.data.repository;
 
 import androidx.lifecycle.MutableLiveData;
@@ -15,7 +16,7 @@ import java.util.List;
 public class ContactRepository {
 
     private final FirebaseFirestore db;
-    private final FirebaseAuth auth;
+    private final FirebaseAuth      auth;
 
     public ContactRepository() {
         this.db   = FirebaseFirestore.getInstance();
@@ -27,33 +28,56 @@ public class ContactRepository {
     }
 
     /**
-     * Busca un usuario por DNI para agregar como contacto.
+     * Recibe una lista de números normalizados del teléfono del usuario
+     * y devuelve los que tienen cuenta en Alerta Segura.
+     *
+     * Firestore "in" soporta hasta 30 elementos por query → chunking automático.
      */
-    public void findUserByDni(String dni,
-                              MutableLiveData<User> userLiveData,
-                              MutableLiveData<String> errorLiveData) {
-        db.collection(Constants.COLLECTION_USERS)
-                .whereEqualTo("dni", dni)
-                .limit(1)
-                .get()
-                .addOnSuccessListener(query -> {
-                    if (query.isEmpty()) {
-                        errorLiveData.setValue("No se encontró ningún usuario con ese DNI");
-                    } else {
-                        User found = query.getDocuments().get(0).toObject(User.class);
-                        if (found != null && found.getUid().equals(currentUid())) {
-                            errorLiveData.setValue("No puedes agregarte a ti mismo");
-                        } else {
-                            userLiveData.setValue(found);
+    public void findUsersByPhones(List<String> normalizedPhones,
+                                  MutableLiveData<List<User>> usersLiveData,
+                                  MutableLiveData<String> errorLiveData) {
+
+        if (normalizedPhones.isEmpty()) {
+            usersLiveData.setValue(new ArrayList<>());
+            return;
+        }
+
+        String myUid = currentUid();
+        List<User> results = new ArrayList<>();
+        int chunkSize = 30;
+        int[] pending = { (int) Math.ceil(normalizedPhones.size() / (double) chunkSize) };
+
+        for (int i = 0; i < normalizedPhones.size(); i += chunkSize) {
+            List<String> chunk = normalizedPhones.subList(
+                    i, Math.min(i + chunkSize, normalizedPhones.size()));
+
+            db.collection(Constants.COLLECTION_USERS)
+                    .whereIn("phone", chunk)
+                    .get()
+                    .addOnSuccessListener(query -> {
+                        for (QueryDocumentSnapshot doc : query) {
+                            User u = doc.toObject(User.class);
+                            // Excluir al propio usuario
+                            if (u != null && !u.getUid().equals(myUid)) {
+                                results.add(u);
+                            }
                         }
-                    }
-                })
-                .addOnFailureListener(e -> errorLiveData.setValue(e.getMessage()));
+                        pending[0]--;
+                        if (pending[0] == 0) {
+                            usersLiveData.setValue(results);
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        pending[0]--;
+                        if (pending[0] == 0) {
+                            if (results.isEmpty()) errorLiveData.setValue(e.getMessage());
+                            else usersLiveData.setValue(results);
+                        }
+                    });
+        }
     }
 
-    /**
-     * Agrega un contacto de confianza (estado "pending").
-     */
+    /** Agrega un contacto de confianza. */
     public void addContact(Contact contact,
                            MutableLiveData<Boolean> successLiveData,
                            MutableLiveData<String> errorLiveData) {
@@ -66,9 +90,7 @@ public class ContactRepository {
                 .addOnFailureListener(e -> errorLiveData.setValue(e.getMessage()));
     }
 
-    /**
-     * Carga la lista de contactos del usuario actual.
-     */
+    /** Carga la lista de contactos del usuario actual. */
     public void loadContacts(MutableLiveData<List<Contact>> contactsLiveData,
                              MutableLiveData<String> errorLiveData) {
         db.collection(Constants.COLLECTION_USERS)
@@ -78,17 +100,14 @@ public class ContactRepository {
                 .addOnSuccessListener(query -> {
                     List<Contact> list = new ArrayList<>();
                     for (QueryDocumentSnapshot doc : query) {
-                        Contact c = doc.toObject(Contact.class);
-                        list.add(c);
+                        list.add(doc.toObject(Contact.class));
                     }
                     contactsLiveData.setValue(list);
                 })
                 .addOnFailureListener(e -> errorLiveData.setValue(e.getMessage()));
     }
 
-    /**
-     * Elimina un contacto.
-     */
+    /** Elimina un contacto. */
     public void removeContact(String contactUid,
                               MutableLiveData<Boolean> successLiveData) {
         db.collection(Constants.COLLECTION_USERS)

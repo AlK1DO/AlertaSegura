@@ -7,11 +7,9 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
-import com.example.alertasegura.data.model.Contact;
 import com.example.alertasegura.data.repository.AlertRepository;
 import com.google.firebase.firestore.GeoPoint;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -35,22 +33,20 @@ public class AlertViewModel extends AndroidViewModel {
      * @param senderName nombre del usuario
      * @param senderDni  DNI del usuario
      * @param location   ubicación obtenida por LocationManager / FusedLocationProvider
-     * @param contacts   lista de contactos seleccionados para notificar
+     * @param contactUids lista de UIDs de contactos seleccionados para notificar
      */
     public void sendSosAlert(String senderName, String senderDni,
-                             Location location, List<Contact> contacts) {
+                             Location location, List<String> contactUids) {
         if (location == null) {
             errorLiveData.setValue("No se pudo obtener tu ubicación. Activa el GPS.");
             return;
         }
         loadingLiveData.setValue(true);
-        List<String> uids = new ArrayList<>();
-        for (Contact c : contacts) uids.add(c.getContactUid());
 
         alertRepository.sendAlert(
                 senderName, senderDni,
                 location.getLatitude(), location.getLongitude(),
-                uids,
+                contactUids,
                 alertIdLiveData, errorLiveData
         );
         loadingLiveData.setValue(false);

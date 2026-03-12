@@ -1,5 +1,15 @@
 // ============================================================
-// ui/home/HomeFragment.java  — Botón SOS con selección de contactos
+// ui/home/HomeFragment.java
+//
+// Flujo simplificado:
+//   1. Mantener presionado SOS
+//   2. Obtiene ubicación
+//   3. Guarda alerta en Firestore (feed comunitario)
+//   4. Abre WhatsApp directo a cada contacto de confianza
+//      → sin selector, el usuario solo toca "Enviar" en cada chat
+//
+// Los contactos de confianza se configuran UNA SOLA VEZ
+// en la pestaña "Contactos".
 // ============================================================
 package com.example.alertasegura.ui.home;
 
@@ -10,11 +20,12 @@ import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -24,18 +35,18 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
+import com.example.alertasegura.R;
 import com.example.alertasegura.data.model.Contact;
-import com.example.alertasegura.data.model.User;
 import com.example.alertasegura.databinding.FragmentHomeBinding;
+import com.example.alertasegura.util.WhatsAppHelper;
 import com.example.alertasegura.viewmodel.AlertViewModel;
 import com.example.alertasegura.viewmodel.ContactViewModel;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
@@ -46,30 +57,31 @@ import java.util.Locale;
 
 public class HomeFragment extends Fragment {
 
-    private FragmentHomeBinding binding;
-    private AlertViewModel alertViewModel;
-    private ContactViewModel contactViewModel;
+    private FragmentHomeBinding         binding;
+    private AlertViewModel              alertViewModel;
+    private ContactViewModel            contactViewModel;
     private FusedLocationProviderClient fusedLocation;
 
-    private String activeAlertId = null;
-    private String senderName    = "";
-    private String senderDni     = "";
-    private List<Contact> allContacts = new ArrayList<>();
+    private String        activeAlertId   = null;
+    private String        senderName      = "";
+    private String        senderDni       = "";
+    private List<Contact> trustedContacts = new ArrayList<>();
 
-    // Animación del anillo SOS
     private ObjectAnimator ringPulse;
 
     private final ActivityResultLauncher<String> locationPermLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
-                if (granted) triggerSos();
+                if (granted) getLocationAndSend();
                 else Snackbar.make(binding.getRoot(),
-                        "Necesitamos tu ubicación para enviar la alerta", Snackbar.LENGTH_LONG).show();
+                        "Necesitamos tu ubicación para enviar la alerta",
+                        Snackbar.LENGTH_LONG).show();
             });
 
     // ─── Lifecycle ────────────────────────────────────────────────────────────
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
@@ -82,7 +94,7 @@ public class HomeFragment extends Fragment {
         alertViewModel   = new ViewModelProvider(requireActivity()).get(AlertViewModel.class);
         contactViewModel = new ViewModelProvider(requireActivity()).get(ContactViewModel.class);
 
-        setupUserInfo();
+        loadUserInfo();
         setupObservers();
         setupSosButton();
         setupRingAnimation();
@@ -91,22 +103,18 @@ public class HomeFragment extends Fragment {
 
     // ─── Setup ────────────────────────────────────────────────────────────────
 
-    private void setupUserInfo() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+    private void loadUserInfo() {
+        var user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) return;
-
-        // Cargar nombre y DNI desde Firestore para mostrar y usar en la alerta
         FirebaseFirestore.getInstance()
                 .collection("users")
                 .document(user.getUid())
                 .get()
                 .addOnSuccessListener(snap -> {
-                    if (snap.exists()) {
-                        senderName = snap.getString("fullName") != null ? snap.getString("fullName") : "";
-                        senderDni  = snap.getString("dni") != null ? snap.getString("dni") : "";
-                        String display = senderName.isEmpty() ? user.getEmail() : senderName;
-                        binding.tvUserName.setText(display);
-                    }
+                    if (!snap.exists()) return;
+                    senderName = snap.getString("fullName") != null ? snap.getString("fullName") : "";
+                    senderDni  = snap.getString("dni")      != null ? snap.getString("dni")      : "";
+                    binding.tvUserName.setText(senderName.isEmpty() ? user.getEmail() : senderName);
                 });
     }
 
@@ -127,30 +135,17 @@ public class HomeFragment extends Fragment {
             }
         });
 
+        // Mantener lista de contactos de confianza actualizada
         contactViewModel.contactsLiveData.observe(getViewLifecycleOwner(), contacts -> {
-            allContacts = contacts != null ? contacts : new ArrayList<>();
+            trustedContacts = contacts != null ? contacts : new ArrayList<>();
+            updateContactsHint();
         });
     }
 
     private void setupSosButton() {
         binding.btnSOS.setOnLongClickListener(v -> {
-            if (activeAlertId != null) {
-                // Ya hay alerta activa → confirmar cancelación
-                new AlertDialog.Builder(requireContext())
-                        .setTitle("¿Cancelar alerta?")
-                        .setMessage("¿Confirmas que estás a salvo y quieres cancelar la alerta activa?")
-                        .setPositiveButton("Sí, estoy a salvo", (d, w) -> {
-                            alertViewModel.resolveAlert(activeAlertId);
-                            activeAlertId = null;
-                            setAlertActive(false);
-                            binding.tvLastAlertStatus.setText("✅ Alerta cancelada");
-                        })
-                        .setNegativeButton("No", null)
-                        .show();
-            } else {
-                // Iniciar flujo de envío
-                checkLocationAndSend();
-            }
+            if (activeAlertId != null) confirmCancel();
+            else checkPermissionAndSend();
             return true;
         });
     }
@@ -163,84 +158,111 @@ public class HomeFragment extends Fragment {
         ringPulse.setInterpolator(new AccelerateDecelerateInterpolator());
     }
 
-    // ─── SOS Logic ────────────────────────────────────────────────────────────
+    // ─── Flujo SOS ────────────────────────────────────────────────────────────
 
-    private void checkLocationAndSend() {
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
+    private void checkPermissionAndSend() {
+        if (ContextCompat.checkSelfPermission(requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             locationPermLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
         } else {
-            triggerSos();
+            getLocationAndSend();
         }
     }
 
     @SuppressLint("MissingPermission")
-    private void triggerSos() {
-        if (allContacts.isEmpty()) {
-            // Sin contactos → enviar solo a comunidad
-            showContactSelectionDialog(new ArrayList<>());
-        } else {
-            // Mostrar selector de contactos
-            showContactSelectionDialog(allContacts);
-        }
-    }
-
-    private void showContactSelectionDialog(List<Contact> contacts) {
-        if (contacts.isEmpty()) {
-            // Sin contactos, enviar directo a comunidad
-            confirmAndSend(new ArrayList<>());
+    private void getLocationAndSend() {
+        // Sin contactos → redirigir a configurarlos primero
+        if (trustedContacts.isEmpty()) {
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("Sin contactos de confianza")
+                    .setMessage("Primero agrega al menos un contacto de confianza en la pestaña Contactos. Ellos recibirán tu ubicación cuando actives SOS.")
+                    .setPositiveButton("Ir a Contactos", (d, w) ->
+                            Navigation.findNavController(requireView())
+                                    .navigate(R.id.contactsFragment))
+                    .setNegativeButton("Cancelar", null)
+                    .show();
             return;
         }
 
-        String[] names    = new String[contacts.size()];
-        boolean[] checked = new boolean[contacts.size()];
-        for (int i = 0; i < contacts.size(); i++) {
-            names[i]   = contacts.get(i).getDisplayName();
-            checked[i] = true; // todos seleccionados por defecto
+        Snackbar.make(binding.getRoot(), "Obteniendo ubicación...", Snackbar.LENGTH_SHORT).show();
+
+        fusedLocation.getLastLocation().addOnSuccessListener(location -> {
+            if (location == null) {
+                Snackbar.make(binding.getRoot(),
+                        "No se pudo obtener la ubicación. Activa el GPS e inténtalo de nuevo.",
+                        Snackbar.LENGTH_LONG).show();
+                return;
+            }
+            sendAlert(location);
+        });
+    }
+
+    private void sendAlert(Location location) {
+        double lat = location.getLatitude();
+        double lng = location.getLongitude();
+
+        // 1. Guardar en Firestore → dispara Cloud Function → FCM a contactos con la app
+        List<String> uids = new ArrayList<>();
+        for (Contact c : trustedContacts) uids.add(c.getContactUid());
+        alertViewModel.sendSosAlert(senderName, senderDni, location, uids);
+
+        // 2. Abrir WhatsApp para cada contacto de confianza, uno a uno
+        //    Delay de 2s entre chats para que el usuario pueda tocar "Enviar"
+        Handler handler = new Handler(Looper.getMainLooper());
+        for (int i = 0; i < trustedContacts.size(); i++) {
+            Contact contact = trustedContacts.get(i);
+            long delay = i * 2000L;
+            handler.postDelayed(() ->
+                            WhatsAppHelper.openWhatsAppSos(
+                                    requireContext(),
+                                    contact.getPhone(),
+                                    senderName,
+                                    lat,
+                                    lng),
+                    delay);
         }
+    }
 
-        List<Contact> selected = new ArrayList<>(contacts);
+    // ─── Cancelar alerta ──────────────────────────────────────────────────────
 
+    private void confirmCancel() {
         new AlertDialog.Builder(requireContext())
-                .setTitle("¿A quién notificar?")
-                .setMultiChoiceItems(names, checked, (dialog, which, isChecked) -> {
-                    if (isChecked) selected.add(contacts.get(which));
-                    else selected.remove(contacts.get(which));
+                .setTitle("¿Cancelar alerta?")
+                .setMessage("¿Confirmas que estás a salvo?")
+                .setPositiveButton("Sí, estoy a salvo", (d, w) -> {
+                    alertViewModel.resolveAlert(activeAlertId);
+                    activeAlertId = null;
+                    setAlertActive(false);
+                    binding.tvLastAlertStatus.setText("✅ Alerta cancelada");
                 })
-                .setPositiveButton("Enviar alerta", (d, w) -> confirmAndSend(selected))
-                .setNegativeButton("Cancelar", null)
+                .setNegativeButton("No", null)
                 .show();
     }
 
-    @SuppressLint("MissingPermission")
-    private void confirmAndSend(List<Contact> selectedContacts) {
-        fusedLocation.getLastLocation().addOnSuccessListener(location -> {
-            if (location == null) {
-                // Solicitar ubicación fresca si lastLocation es null
-                Snackbar.make(binding.getRoot(), "Obteniendo tu ubicación...", Snackbar.LENGTH_SHORT).show();
-                // Re-intentar con updateLocation en producción
-                // Por ahora usamos una ubicación aproximada placeholder
-                Toast.makeText(requireContext(), "Activa el GPS e inténtalo de nuevo.", Toast.LENGTH_LONG).show();
-                return;
-            }
-            alertViewModel.sendSosAlert(senderName, senderDni, location, selectedContacts);
-        });
+    // ─── UI helpers ───────────────────────────────────────────────────────────
+
+    private void updateContactsHint() {
+        if (activeAlertId != null) return; // no pisar el estado de alerta activa
+        if (trustedContacts.isEmpty()) {
+            binding.tvLastAlertStatus.setText("⚠️ Sin contactos de confianza — ve a la pestaña Contactos");
+        } else {
+            int n = trustedContacts.size();
+            binding.tvLastAlertStatus.setText("✅ " + n + " contacto" + (n > 1 ? "s" : "") + " de confianza");
+        }
     }
 
     private void setAlertActive(boolean active) {
         if (active) {
-            binding.btnSOS.setText("ACTIVA\n(manten para\ncancelar)");
-            binding.btnSOS.setBackgroundResource(com.example.alertasegura.R.drawable.circle_sos_active);
+            binding.btnSOS.setText("ACTIVA\n(mantén para\ncancelar)");
+            binding.btnSOS.setBackgroundResource(R.drawable.circle_sos_active);
             ringPulse.start();
         } else {
             binding.btnSOS.setText("SOS");
-            binding.btnSOS.setBackgroundResource(com.example.alertasegura.R.drawable.circle_sos_button);
+            binding.btnSOS.setBackgroundResource(R.drawable.circle_sos_button);
             ringPulse.cancel();
             binding.viewSosRing.setAlpha(1f);
         }
     }
-
-    // ─── Lifecycle ────────────────────────────────────────────────────────────
 
     @Override
     public void onDestroyView() {
