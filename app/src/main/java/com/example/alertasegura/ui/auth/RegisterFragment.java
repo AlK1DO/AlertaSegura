@@ -1,4 +1,6 @@
-// com/example/alertasegura/ui/auth/RegisterFragment.java
+// ============================================================
+// ui/auth/RegisterFragment.java
+// ============================================================
 package com.example.alertasegura.ui.auth;
 
 import android.content.Intent;
@@ -34,11 +36,13 @@ public class RegisterFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // Inicializa el ViewModel compartido con la Activity
         authViewModel = new ViewModelProvider(requireActivity()).get(AuthViewModel.class);
 
-        // Registro exitoso → apagar loading e ir a MainActivity
+        // Observa el éxito del registro para navegar a la pantalla principal
         authViewModel.registeredUserLiveData.observe(getViewLifecycleOwner(), user -> {
             if (user != null) {
+                android.util.Log.d("DEBUG", "Registro exitoso: " + user.getFullName());
                 setLoading(false);
                 Intent intent = new Intent(requireActivity(), MainActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -46,16 +50,17 @@ public class RegisterFragment extends Fragment {
             }
         });
 
-        // Error → apagar loading y mostrar mensaje
+        // Observa errores y los muestra mediante un Snackbar
         authViewModel.errorLiveData.observe(getViewLifecycleOwner(), error -> {
             if (error != null && !error.isEmpty()) {
+                android.util.Log.e("DEBUG", "Error detectado: " + error);
                 setLoading(false);
                 Snackbar.make(binding.getRoot(), error, Snackbar.LENGTH_LONG).show();
-                authViewModel.errorLiveData.setValue(null); // limpiar
+                authViewModel.errorLiveData.setValue(null); // Limpia el error tras mostrarlo
             }
         });
 
-        // Botón registrar
+        // Configura el botón de registro con validaciones previas
         binding.btnRegister.setOnClickListener(v -> {
             String fullName        = binding.etFullName.getText().toString().trim();
             String dni             = binding.etDni.getText().toString().trim();
@@ -70,17 +75,19 @@ public class RegisterFragment extends Fragment {
             }
         });
 
-        // Ir a login
+        // Navegación hacia atrás para volver al Login
         binding.tvGoToLogin.setOnClickListener(v ->
                 Navigation.findNavController(view).navigateUp()
         );
     }
 
+    // Gestiona la visibilidad del progreso y estado del botón
     private void setLoading(boolean isLoading) {
         binding.btnRegister.setEnabled(!isLoading);
         binding.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
     }
 
+    // Validaciones de negocio para los campos de entrada
     private boolean validateInputs(String fullName, String dni, String phone,
                                    String email, String password, String confirmPassword) {
         if (fullName.isEmpty()) {
@@ -89,13 +96,13 @@ public class RegisterFragment extends Fragment {
         }
         binding.tilFullName.setError(null);
 
-        if (dni.isEmpty() || dni.length() != 8) {
+        if (dni.length() != 8) {
             binding.tilDni.setError("El DNI debe tener 8 dígitos");
             return false;
         }
         binding.tilDni.setError(null);
 
-        if (phone.isEmpty() || phone.length() != 9) {
+        if (phone.length() != 9) {
             binding.tilPhone.setError("El teléfono debe tener 9 dígitos");
             return false;
         }
@@ -125,6 +132,6 @@ public class RegisterFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        binding = null;
+        binding = null; // Evita fugas de memoria
     }
 }

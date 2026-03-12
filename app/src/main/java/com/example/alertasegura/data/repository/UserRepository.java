@@ -22,7 +22,7 @@ public class UserRepository {
         this.firestoreDataSource = new FirestoreDataSource();
     }
 
-    // Registro completo: crea Auth + perfil en Firestore
+    // Registro completo: crea Auth y luego el perfil en Firestore
     public void registerWithProfile(String email, String password,
                                     String fullName, String dni, String phone,
                                     MutableLiveData<User> userLiveData,
@@ -36,29 +36,29 @@ public class UserRepository {
                         return;
                     }
 
-                    // Crear el modelo User con los datos del formulario
+                    // Creamos el objeto User con la información recibida
                     User newUser = new User(
                             firebaseUser.getUid(),
-                            fullName,
-                            dni,
-                            phone,
-                            email
+                            fullName, dni, phone, email
                     );
 
-                    // Guardar en Firestore
-                    MutableLiveData<Boolean> successLiveData = new MutableLiveData<>();
-                    firestoreDataSource.createUserProfile(newUser, successLiveData, errorLiveData);
-
-                    successLiveData.observeForever(success -> {
-                        if (Boolean.TRUE.equals(success)) {
-                            userLiveData.setValue(newUser);
-                        }
-                    });
+                    // Callback directo a Firestore tras el éxito en Auth <--- Pruena
+                    firestoreDataSource.createUserProfile(
+                            newUser,
+                            unused -> {
+                                android.util.Log.d("DEBUG", "Firestore OK → Perfil creado");
+                                userLiveData.setValue(newUser);
+                            },
+                            e -> {
+                                android.util.Log.e("DEBUG", "Firestore ERROR: " + e.getMessage());
+                                errorLiveData.setValue(e.getMessage());
+                            }
+                    ); //hasta aca
                 })
                 .addOnFailureListener(e -> errorLiveData.setValue(e.getMessage()));
     }
 
-    // Login simple (solo Auth, el perfil se carga después si hace falta)
+    // Inicio de sesión simple usando Firebase Auth
     public void login(String email, String password,
                       MutableLiveData<FirebaseUser> firebaseUserLiveData,
                       MutableLiveData<String> errorLiveData) {
@@ -67,7 +67,7 @@ public class UserRepository {
                 .addOnFailureListener(e -> errorLiveData.setValue(e.getMessage()));
     }
 
-    // Cargar perfil del usuario actual desde Firestore
+    // Carga los datos adicionales del usuario desde la base de datos
     public void loadCurrentUserProfile(MutableLiveData<User> userLiveData,
                                        MutableLiveData<String> errorLiveData) {
         FirebaseUser current = firebaseAuth.getCurrentUser();
@@ -78,10 +78,12 @@ public class UserRepository {
         firestoreDataSource.getUserProfile(current.getUid(), userLiveData, errorLiveData);
     }
 
+    // Retorna el usuario de Auth actual
     public FirebaseUser getCurrentFirebaseUser() {
         return firebaseAuth.getCurrentUser();
     }
 
+    // Cierra la sesión en Firebase
     public void logout() {
         firebaseAuth.signOut();
     }
