@@ -1,45 +1,58 @@
+// com/example/alertasegura/viewmodel/AuthViewModel.java
 package com.example.alertasegura.viewmodel;
 
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.example.alertasegura.data.repository.AuthRepository;
+import com.example.alertasegura.data.model.User;
+import com.example.alertasegura.data.repository.UserRepository;
 import com.google.firebase.auth.FirebaseUser;
 
 public class AuthViewModel extends ViewModel {
 
-    private final AuthRepository authRepository;
+    private final UserRepository userRepository;
 
-    // Los Fragments observan estos LiveData
-    public final MutableLiveData<FirebaseUser> userLiveData = new MutableLiveData<>();
+    // Login simple → devuelve FirebaseUser
+    public final MutableLiveData<FirebaseUser> firebaseUserLiveData = new MutableLiveData<>();
+
+    // Registro completo → devuelve User con todos los datos
+    public final MutableLiveData<User> registeredUserLiveData = new MutableLiveData<>();
+
     public final MutableLiveData<String> errorLiveData = new MutableLiveData<>();
     public final MutableLiveData<Boolean> loadingLiveData = new MutableLiveData<>(false);
 
     public AuthViewModel() {
-        authRepository = new AuthRepository();
+        userRepository = new UserRepository();
     }
 
-    public void register(String email, String password) {
+    // Registro completo: Auth + Firestore
+    public void register(String email, String password,
+                         String fullName, String dni, String phone) {
         loadingLiveData.setValue(true);
-        authRepository.register(email, password, userLiveData, errorLiveData);
-        // Cuando userLiveData o errorLiveData se actualicen, el Fragment reacciona
-        userLiveData.observeForever(user -> loadingLiveData.setValue(false));
+        userRepository.registerWithProfile(
+                email, password, fullName, dni, phone,
+                registeredUserLiveData,
+                errorLiveData
+        );
+        registeredUserLiveData.observeForever(user -> loadingLiveData.setValue(false));
         errorLiveData.observeForever(err -> loadingLiveData.setValue(false));
     }
 
+    // Login con email y contraseña
     public void login(String email, String password) {
         loadingLiveData.setValue(true);
-        authRepository.login(email, password, userLiveData, errorLiveData);
-        userLiveData.observeForever(user -> loadingLiveData.setValue(false));
+        userRepository.login(email, password, firebaseUserLiveData, errorLiveData);
+        firebaseUserLiveData.observeForever(user -> loadingLiveData.setValue(false));
         errorLiveData.observeForever(err -> loadingLiveData.setValue(false));
     }
 
     public void logout() {
-        authRepository.logout();
-        userLiveData.setValue(null);
+        userRepository.logout();
+        firebaseUserLiveData.setValue(null);
+        registeredUserLiveData.setValue(null);
     }
 
     public FirebaseUser getCurrentUser() {
-        return authRepository.getCurrentUser();
+        return userRepository.getCurrentFirebaseUser();
     }
 }
