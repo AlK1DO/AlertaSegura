@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/menu/menu_bottom_nav.xml -->
+<!--
+    Los IDs deben coincidir EXACTAMENTE con los IDs de los
+    fragments en nav_main.xml para que NavigationUI funcione.
+-->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/homeFragment"
+        android:icon="@android:drawable/ic_menu_compass"
+        android:title="Inicio"/>
+
+    <item
+        android:id="@+id/contactsFragment"
+        android:icon="@android:drawable/ic_menu_myplaces"
+        android:title="Contactos"/>
+
+    <item
+        android:id="@+id/communityFragment"
+        android:icon="@android:drawable/ic_menu_agenda"
+        android:title="Comunidad"/>
+
+    <item
+        android:id="@+id/mapFragment"
+        android:icon="@android:drawable/ic_menu_mapmode"
+        android:title="Mapa"/>
+
+</menu>
