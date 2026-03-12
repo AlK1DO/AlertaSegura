@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- AndroidManifest.xml — completo con servicios -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -9,8 +8,6 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
-    <uses-permission android:name="android.permission.INTERNET" />
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -19,11 +16,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AlertaSegura">
 
-        <!-- SplashActivity es el punto de entrada -->
         <activity
             android:name=".ui.SplashActivity"
-            android:exported="true"
-            android:theme="@style/Theme.AlertaSegura.NoActionBar">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -32,12 +27,24 @@
 
         <activity
             android:name=".ui.auth.AuthActivity"
-            android:exported="false"
-            android:theme="@style/Theme.AlertaSegura.NoActionBar"/>
+            android:exported="false" />
 
         <activity
             android:name=".ui.main.MainActivity"
-            android:exported="false"/>
+            android:exported="false" />
+
+        <service
+            android:name=".service.FCMService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".service.LocationService"
+            android:foregroundServiceType="location"
+            android:exported="false" />
 
     </application>
 
