@@ -3,12 +3,12 @@
 // ============================================================
 package com.example.alertasegura.data.remote;
 
+import androidx.lifecycle.MutableLiveData;
+
 import com.example.alertasegura.data.model.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-
-import androidx.lifecycle.MutableLiveData;
 
 public class FirestoreDataSource {
 
@@ -16,22 +16,44 @@ public class FirestoreDataSource {
     private final FirebaseFirestore db;
 
     public FirestoreDataSource() {
-        // Inicializa la instancia de Firebase Firestore
         this.db = FirebaseFirestore.getInstance();
     }
 
-    // Crea el perfil del usuario en la colección "users" usando su UID
+    public FirebaseFirestore getDb() {
+        return db;
+    }
+
+    /**
+     * Versión que usa Listeners para mayor control desde el Repository.
+     */
     public void createUserProfile(User user,
-                                  OnSuccessListener<Void> onSuccess,
-                                  OnFailureListener onFailure) {
+                                  OnSuccessListener<Void> successListener,
+                                  OnFailureListener failureListener) {
         db.collection(COLLECTION_USERS)
                 .document(user.getUid())
                 .set(user)
-                .addOnSuccessListener(onSuccess)
-                .addOnFailureListener(onFailure);
+                .addOnSuccessListener(successListener)
+                .addOnFailureListener(failureListener);
     }
 
-    // Obtiene los datos del usuario y los envía a los LiveData correspondientes
+    /**
+     * Versión antigua con LiveData (mantener por compatibilidad si se usa en otros lados).
+     */
+    public void createUserProfile(User user,
+                                  MutableLiveData<Boolean> successLiveData,
+                                  MutableLiveData<String> errorLiveData) {
+        db.collection(COLLECTION_USERS)
+                .document(user.getUid())
+                .set(user)
+                .addOnSuccessListener(unused -> {
+                    if (successLiveData != null) successLiveData.setValue(true);
+                })
+                .addOnFailureListener(e -> {
+                    if (errorLiveData != null) errorLiveData.setValue(e.getMessage());
+                });
+    }
+
+    // Obtener perfil de usuario por UID
     public void getUserProfile(String uid,
                                MutableLiveData<User> userLiveData,
                                MutableLiveData<String> errorLiveData) {
@@ -40,7 +62,6 @@ public class FirestoreDataSource {
                 .get()
                 .addOnSuccessListener(snapshot -> {
                     if (snapshot.exists()) {
-                        // Convierte el documento de Firestore a la clase User
                         userLiveData.setValue(snapshot.toObject(User.class));
                     } else {
                         errorLiveData.setValue("Perfil no encontrado");
@@ -49,13 +70,13 @@ public class FirestoreDataSource {
                 .addOnFailureListener(e -> errorLiveData.setValue(e.getMessage()));
     }
 
-    // Actualiza solo el token de notificaciones (FCM) para el usuario
+    // Actualizar FCM token cuando el usuario inicia sesión
     public void updateFcmToken(String uid, String token) {
         db.collection(COLLECTION_USERS)
                 .document(uid)
                 .update("fcmToken", token)
                 .addOnFailureListener(e -> {
-                    // Error silencioso: no interrumpe el flujo principal
+                    // Log silencioso, no crítico
                 });
     }
 }

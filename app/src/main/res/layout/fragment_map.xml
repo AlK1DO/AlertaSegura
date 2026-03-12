@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- res/layout/fragment_map.xml -->
+<!-- res/layout/fragment_map.xml — MapLibre GL -->
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -68,7 +68,7 @@
 
     </com.google.android.material.chip.ChipGroup>
 
-    <!-- Texto sin datos -->
+    <!-- Mensaje sin datos -->
     <TextView
         android:id="@+id/tvNoData"
         android:layout_width="wrap_content"
@@ -77,15 +77,15 @@
         android:textSize="14sp"
         android:textColor="#AAAAAA"
         android:visibility="gone"
-        android:padding="16dp"
+        android:padding="12dp"
+        android:background="#CCFFFFFF"
         app:layout_constraintTop_toBottomOf="@id/chipGroupPeriod"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Google Map real con HeatmapTileProvider -->
-    <androidx.fragment.app.FragmentContainerView
+    <!-- MapLibre MapView — NO necesita API key -->
+    <org.maplibre.android.maps.MapView
         android:id="@+id/mapView"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="4dp"

@@ -1,3 +1,4 @@
+// app/build.gradle.kts  — MapLibre en lugar de Google Maps
 plugins {
     alias(libs.plugins.android.application)
     id("com.google.gms.google-services")
@@ -54,10 +55,11 @@ dependencies {
     implementation("com.google.firebase:firebase-messaging")
     implementation("com.google.firebase:firebase-database")
 
-    // Google Maps + Heatmap
-    implementation("com.google.android.gms:play-services-maps:19.0.0")
+    // Ubicación (FusedLocationProvider — solo play-services-location, sin Maps)
     implementation("com.google.android.gms:play-services-location:21.3.0")
-    implementation("com.google.maps.android:android-maps-utils:3.8.2")
+
+    // MapLibre GL Android — open source, sin API key
+    implementation("org.maplibre.gl:android-sdk:11.5.2")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)

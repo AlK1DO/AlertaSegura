@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- AndroidManifest.xml — ACTUALIZADO con Google Maps meta-data -->
+<!-- AndroidManifest.xml — sin meta-data de Google Maps (MapLibre no lo necesita) -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -10,7 +10,6 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -18,14 +17,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AlertaSegura">
-
-        <!--
-            ⚠️  IMPORTANTE: Reemplaza "YOUR_GOOGLE_MAPS_API_KEY" con tu clave real
-            obtenida en https://console.cloud.google.com → Maps SDK for Android
-        -->
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="YOUR_GOOGLE_MAPS_API_KEY"/>
 
         <activity
             android:name=".ui.SplashActivity"
@@ -36,13 +27,8 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".ui.auth.AuthActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".ui.main.MainActivity"
-            android:exported="false" />
+        <activity android:name=".ui.auth.AuthActivity"  android:exported="false" />
+        <activity android:name=".ui.main.MainActivity"  android:exported="false" />
 
         <service
             android:name=".service.FCMService"
