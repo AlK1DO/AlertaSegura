@@ -42,18 +42,12 @@ public class UserRepository {
                             fullName, dni, phone, email
                     );
 
-                    // Callback directo a Firestore tras el éxito en Auth <--- Pruena
+                    // Callback directo a Firestore, sin LiveData intermedio
                     firestoreDataSource.createUserProfile(
                             newUser,
-                            unused -> {
-                                android.util.Log.d("DEBUG", "Firestore OK → Perfil creado");
-                                userLiveData.setValue(newUser);
-                            },
-                            e -> {
-                                android.util.Log.e("DEBUG", "Firestore ERROR: " + e.getMessage());
-                                errorLiveData.setValue(e.getMessage());
-                            }
-                    ); //hasta aca
+                            unused -> userLiveData.setValue(newUser),   // éxito
+                            e -> errorLiveData.setValue(e.getMessage()) // error
+                    );
                 })
                 .addOnFailureListener(e -> errorLiveData.setValue(e.getMessage()));
     }
