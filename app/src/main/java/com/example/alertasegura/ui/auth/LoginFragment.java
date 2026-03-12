@@ -38,7 +38,7 @@ public class LoginFragment extends Fragment {
         // Observar si el login fue exitoso
         authViewModel.firebaseUserLiveData.observe(getViewLifecycleOwner(), user -> {
             if (user != null) {
-                // Login exitoso → ir a MainActivity
+                setLoading(false);
                 Intent intent = new Intent(requireActivity(), MainActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
@@ -48,14 +48,9 @@ public class LoginFragment extends Fragment {
         // Observar errores
         authViewModel.errorLiveData.observe(getViewLifecycleOwner(), error -> {
             if (error != null && !error.isEmpty()) {
+                setLoading(false);
                 Snackbar.make(binding.getRoot(), error, Snackbar.LENGTH_LONG).show();
             }
-        });
-
-        // Observar estado de carga
-        authViewModel.loadingLiveData.observe(getViewLifecycleOwner(), isLoading -> {
-            binding.btnLogin.setEnabled(!isLoading);
-            binding.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         });
 
         // Botón de login
@@ -94,5 +89,9 @@ public class LoginFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+    private void setLoading(boolean isLoading) {
+        binding.btnLogin.setEnabled(!isLoading);
+        binding.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
     }
 }
