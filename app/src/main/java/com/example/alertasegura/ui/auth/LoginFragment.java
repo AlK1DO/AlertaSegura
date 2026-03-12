@@ -36,7 +36,7 @@ public class LoginFragment extends Fragment {
         authViewModel = new ViewModelProvider(requireActivity()).get(AuthViewModel.class);
 
         // Observar si el login fue exitoso
-        authViewModel.userLiveData.observe(getViewLifecycleOwner(), user -> {
+        authViewModel.firebaseUserLiveData.observe(getViewLifecycleOwner(), user -> {
             if (user != null) {
                 // Login exitoso → ir a MainActivity
                 Intent intent = new Intent(requireActivity(), MainActivity.class);
