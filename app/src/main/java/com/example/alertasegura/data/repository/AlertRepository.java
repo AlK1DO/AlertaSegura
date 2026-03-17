@@ -12,7 +12,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
-import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,8 +23,8 @@ public class AlertRepository {
 
     private final FirebaseFirestore db;
     private final DatabaseReference rtDb;
-    private final FirebaseAuth auth;
-    private ValueEventListener activeAlertsListener;
+    private final FirebaseAuth      auth;
+    private ValueEventListener      activeAlertsListener;
 
     public AlertRepository() {
         this.db   = FirebaseFirestore.getInstance();
@@ -33,10 +32,18 @@ public class AlertRepository {
         this.auth = FirebaseAuth.getInstance();
     }
 
+    // ─── Enviar alerta SOS ────────────────────────────────────────────────────
+
     /**
-     * Envía una alerta SOS:
-     * 1. Guarda en Firestore (colección "alerts") con ubicación exacta y aproximada.
-     * 2. Publica en Realtime Database para el feed en tiempo real.
+     * Envía una alerta SOS con validación del límite diario en el servidor.
+     *
+     * Flujo:
+     *  1. Lee el documento del usuario en Firestore para verificar alertsToday
+     *  2. Si ya alcanzó el límite → error, no guarda nada
+     *  3. Si puede → guarda la alerta, incrementa el contador, publica en Realtime DB
+     *
+     * La validación en el servidor es la fuente de verdad.
+     * El chequeo en HomeFragment es solo para evitar el viaje de red innecesario.
      */
     public void sendAlert(String senderName, String senderDni,
                           double lat, double lng,
@@ -45,6 +52,59 @@ public class AlertRepository {
                           MutableLiveData<String> errorLiveData) {
 
         String uid = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : "";
+        if (uid.isEmpty()) {
+            errorLiveData.setValue("No hay sesión activa.");
+            return;
+        }
+
+        // ── Paso 1: Verificar límite diario en Firestore (fuente de verdad) ──
+        db.collection(Constants.COLLECTION_USERS)
+                .document(uid)
+                .get()
+                .addOnSuccessListener(userSnap -> {
+
+                    if (!userSnap.exists()) {
+                        errorLiveData.setValue("No se encontró el perfil de usuario.");
+                        return;
+                    }
+
+                    // Leer campos del límite
+                    long alertsToday    = userSnap.getLong("alertsToday")    != null ? userSnap.getLong("alertsToday")    : 0;
+                    long alertsLimit    = userSnap.getLong("alertsLimit")    != null ? userSnap.getLong("alertsLimit")    : 2;
+                    long lastAlertReset = userSnap.getLong("lastAlertReset") != null ? userSnap.getLong("lastAlertReset") : 0;
+
+                    // Reiniciar contador si ya pasó la medianoche
+                    long now         = System.currentTimeMillis();
+                    long millisInDay = 24 * 60 * 60 * 1000L;
+                    if (now - lastAlertReset >= millisInDay) {
+                        alertsToday    = 0;
+                        lastAlertReset = now;
+                    }
+
+                    // ── Paso 2: Bloquear si ya alcanzó el límite ─────────────
+                    if (alertsToday >= alertsLimit) {
+                        errorLiveData.setValue("LIMIT_REACHED"); // HomeFragment muestra el diálogo
+                        return;
+                    }
+
+                    // ── Paso 3: Todo OK → guardar la alerta ──────────────────
+                    saveAlert(uid, senderName, senderDni, lat, lng,
+                            notifiedContactUids, alertsToday, alertsLimit,
+                            lastAlertReset, alertIdLiveData, errorLiveData);
+                })
+                .addOnFailureListener(e -> errorLiveData.setValue(e.getMessage()));
+    }
+
+    /**
+     * Guarda la alerta en Firestore y Realtime DB,
+     * e incrementa el contador del usuario en la misma operación.
+     */
+    private void saveAlert(String uid, String senderName, String senderDni,
+                           double lat, double lng,
+                           List<String> notifiedContactUids,
+                           long alertsToday, long alertsLimit, long lastAlertReset,
+                           MutableLiveData<String> alertIdLiveData,
+                           MutableLiveData<String> errorLiveData) {
 
         GeoPoint exact  = new GeoPoint(lat, lng);
         GeoPoint approx = offsetLocation(lat, lng, Constants.APPROX_RADIUS_METERS);
@@ -52,7 +112,7 @@ public class AlertRepository {
         Alert alert = new Alert(uid, senderName, senderDni, exact, approx);
         alert.setNotifiedContacts(notifiedContactUids);
 
-        // 1. Guardar en Firestore
+        // 1. Guardar alerta en Firestore
         db.collection(Constants.COLLECTION_ALERTS)
                 .add(alert)
                 .addOnSuccessListener(docRef -> {
@@ -60,7 +120,17 @@ public class AlertRepository {
                     alert.setAlertId(alertId);
                     alertIdLiveData.setValue(alertId);
 
-                    // 2. Publicar en Realtime Database (para feed comunitario en tiempo real)
+                    // 2. Incrementar contador del usuario en Firestore
+                    Map<String, Object> counterUpdate = new HashMap<>();
+                    counterUpdate.put("alertsToday",    alertsToday + 1);
+                    counterUpdate.put("alertsLimit",    alertsLimit);
+                    counterUpdate.put("lastAlertReset", lastAlertReset);
+
+                    db.collection(Constants.COLLECTION_USERS)
+                            .document(uid)
+                            .update(counterUpdate);
+
+                    // 3. Publicar en Realtime Database (feed comunitario en tiempo real)
                     Map<String, Object> rtEntry = new HashMap<>();
                     rtEntry.put("alertId",    alertId);
                     rtEntry.put("senderName", senderName);
@@ -72,7 +142,7 @@ public class AlertRepository {
 
                     rtDb.child(Constants.RT_ACTIVE_ALERTS).child(alertId).setValue(rtEntry);
 
-                    // 3. También guardar en heatmapData con ubicación aprox
+                    // 4. Guardar en heatmapData con ubicación aproximada
                     Map<String, Object> heatEntry = new HashMap<>();
                     heatEntry.put("lat",       approx.getLatitude());
                     heatEntry.put("lng",       approx.getLongitude());
@@ -81,6 +151,8 @@ public class AlertRepository {
                 })
                 .addOnFailureListener(e -> errorLiveData.setValue(e.getMessage()));
     }
+
+    // ─── Resolver alerta ──────────────────────────────────────────────────────
 
     /**
      * Resuelve/cancela una alerta activa.
@@ -93,6 +165,8 @@ public class AlertRepository {
         rtDb.child(Constants.RT_ACTIVE_ALERTS).child(alertId)
                 .child("status").setValue(Constants.STATUS_RESOLVED);
     }
+
+    // ─── Feed comunitario ─────────────────────────────────────────────────────
 
     /**
      * Escucha las alertas activas de la comunidad en tiempo real.
@@ -120,6 +194,8 @@ public class AlertRepository {
                 });
     }
 
+    // ─── Mapa de calor ────────────────────────────────────────────────────────
+
     /**
      * Obtiene datos del mapa de calor para un período dado.
      */
@@ -133,10 +209,10 @@ public class AlertRepository {
                     public void onDataChange(DataSnapshot snapshot) {
                         List<GeoPoint> points = new ArrayList<>();
                         for (DataSnapshot child : snapshot.getChildren()) {
-                            Double lat = child.child("lat").getValue(Double.class);
-                            Double lng = child.child("lng").getValue(Double.class);
-                            if (lat != null && lng != null) {
-                                points.add(new GeoPoint(lat, lng));
+                            Double latVal = child.child("lat").getValue(Double.class);
+                            Double lngVal = child.child("lng").getValue(Double.class);
+                            if (latVal != null && lngVal != null) {
+                                points.add(new GeoPoint(latVal, lngVal));
                             }
                         }
                         heatmapLiveData.postValue(points);
@@ -160,9 +236,9 @@ public class AlertRepository {
      * para ofuscar la ubicación exacta en el feed comunitario.
      */
     private GeoPoint offsetLocation(double lat, double lng, int radiusMeters) {
-        Random rand   = new Random();
-        double dLat   = (rand.nextDouble() * 2 - 1) * (radiusMeters / 111320.0);
-        double dLng   = (rand.nextDouble() * 2 - 1) * (radiusMeters / (111320.0 * Math.cos(Math.toRadians(lat))));
+        Random rand = new Random();
+        double dLat = (rand.nextDouble() * 2 - 1) * (radiusMeters / 111320.0);
+        double dLng = (rand.nextDouble() * 2 - 1) * (radiusMeters / (111320.0 * Math.cos(Math.toRadians(lat))));
         return new GeoPoint(lat + dLat, lng + dLng);
     }
 }

@@ -14,6 +14,13 @@ public class User {
     private long createdAt;
     private boolean isActive;
 
+    // ─── Control de límite de alertas comunitarias ───────────────
+    // Las alertas a contactos privados NO tienen límite (son de confianza)
+    // Solo el feed público está limitado para evitar spam
+    private int alertsToday;        // Cuántas alertas públicas envió hoy (se reinicia a medianoche)
+    private int alertsLimit;        // Límite diario (default: 2 para usuarios free)
+    private long lastAlertReset;    // Timestamp de cuándo se reinició el contador
+
     // Constructor vacío requerido por Firestore
     public User() {}
 
@@ -25,7 +32,55 @@ public class User {
         this.email = email;
         this.createdAt = System.currentTimeMillis();
         this.isActive = true;
+
+        // Valores por defecto para usuario nuevo
+        this.alertsToday = 0;
+        this.alertsLimit = 2;
+        this.lastAlertReset = System.currentTimeMillis();
     }
+
+    // ─── Lógica de límite ────────────────────────────────────────
+
+    /**
+     * Verifica si el usuario puede enviar una alerta pública hoy.
+     * También reinicia el contador si ya pasó la medianoche.
+     */
+    public boolean canSendPublicAlert() {
+        resetIfNewDay();
+        return alertsToday < alertsLimit;
+    }
+
+    /**
+     * Incrementa el contador de alertas del día.
+     * Llamar después de confirmar que la alerta fue enviada.
+     */
+    public void incrementAlertCount() {
+        resetIfNewDay();
+        this.alertsToday++;
+    }
+
+    /**
+     * Cuántas alertas le quedan al usuario hoy.
+     */
+    public int getRemainingAlerts() {
+        resetIfNewDay();
+        return Math.max(0, alertsLimit - alertsToday);
+    }
+
+    /**
+     * Reinicia el contador si ya es un nuevo día (medianoche).
+     */
+    private void resetIfNewDay() {
+        long now = System.currentTimeMillis();
+        long millisInDay = 24 * 60 * 60 * 1000L;
+
+        if (now - lastAlertReset >= millisInDay) {
+            this.alertsToday = 0;
+            this.lastAlertReset = now;
+        }
+    }
+
+    // ─── Getters y Setters existentes ──────────────
 
     public String getUid() { return uid; }
     public void setUid(String uid) { this.uid = uid; }
@@ -50,4 +105,15 @@ public class User {
 
     public boolean isActive() { return isActive; }
     public void setActive(boolean active) { isActive = active; }
+
+    // ─── Getters y Setters nuevos ───────────────────
+
+    public int getAlertsToday() { return alertsToday; }
+    public void setAlertsToday(int alertsToday) { this.alertsToday = alertsToday; }
+
+    public int getAlertsLimit() { return alertsLimit; }
+    public void setAlertsLimit(int alertsLimit) { this.alertsLimit = alertsLimit; }
+
+    public long getLastAlertReset() { return lastAlertReset; }
+    public void setLastAlertReset(long lastAlertReset) { this.lastAlertReset = lastAlertReset; }
 }
