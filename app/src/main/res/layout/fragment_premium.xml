@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- res/layout/fragment_premium.xml -->
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -25,13 +24,36 @@
             android:paddingBottom="16dp"/>
 
         <!-- ─── Header ────────────────────────────────────────────────────── -->
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="⭐"
-            android:textSize="48sp"
+            android:orientation="horizontal"
             android:gravity="center"
-            android:layout_marginTop="8dp"/>
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⭐"
+                android:textSize="48sp"/>
+
+            <!-- Badge ACTIVO — solo visible si ya es Premium -->
+            <TextView
+                android:id="@+id/badgePremiumActive"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ACTIVO"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="#1A1A2E"
+                android:background="@drawable/bg_badge_active"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp"
+                android:layout_marginStart="8dp"
+                android:layout_gravity="center_vertical"
+                android:visibility="gone"/>
+
+        </LinearLayout>
 
         <TextView
             android:layout_width="match_parent"
@@ -52,19 +74,6 @@
             android:gravity="center"
             android:layout_marginTop="4dp"
             android:layout_marginBottom="28dp"/>
-
-        <!-- ─── Estado plan actual ─────────────────────────────────────────── -->
-        <TextView
-            android:id="@+id/tvPremiumStatus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Tu plan Premium está activo"
-            android:textSize="14sp"
-            android:textColor="#4CAF50"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:visibility="gone"
-            android:layout_marginBottom="16dp"/>
 
         <!-- ─── Tabla comparativa Free vs Premium ──────────────────────────── -->
         <androidx.cardview.widget.CardView
@@ -87,42 +96,23 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:layout_marginBottom="12dp">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:text="Beneficio"
-                        android:textColor="#AAAAAA"
-                        android:textSize="12sp"
-                        android:textStyle="bold"/>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Free"
-                        android:textColor="#AAAAAA"
-                        android:textSize="12sp"
-                        android:textStyle="bold"
-                        android:gravity="center"/>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Premium"
-                        android:textColor="#FFD700"
-                        android:textSize="12sp"
-                        android:textStyle="bold"
-                        android:gravity="center"/>
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="2" android:text="Beneficio"
+                        android:textColor="#AAAAAA" android:textSize="12sp" android:textStyle="bold"/>
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:text="Free"
+                        android:textColor="#AAAAAA" android:textSize="12sp"
+                        android:textStyle="bold" android:gravity="center"/>
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:text="Premium"
+                        android:textColor="#FFD700" android:textSize="12sp"
+                        android:textStyle="bold" android:gravity="center"/>
                 </LinearLayout>
 
-                <!-- Divisor -->
                 <View android:layout_width="match_parent" android:layout_height="1dp"
                     android:background="#333355" android:layout_marginBottom="12dp"/>
 
-                <!-- Fila 1: Alertas comunitarias -->
+                <!-- Fila 1 -->
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:orientation="horizontal" android:layout_marginBottom="14dp">
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
@@ -140,7 +130,7 @@
                         android:textSize="16sp" android:textStyle="bold" android:gravity="center"/>
                 </LinearLayout>
 
-                <!-- Fila 2: Contactos de confianza -->
+                <!-- Fila 2 -->
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:orientation="horizontal" android:layout_marginBottom="14dp">
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
@@ -158,7 +148,7 @@
                         android:textSize="16sp" android:textStyle="bold" android:gravity="center"/>
                 </LinearLayout>
 
-                <!-- Fila 3: Historial -->
+                <!-- Fila 3 -->
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:orientation="horizontal" android:layout_marginBottom="14dp">
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
@@ -176,7 +166,7 @@
                         android:textSize="13sp" android:textStyle="bold" android:gravity="center"/>
                 </LinearLayout>
 
-                <!-- Fila 4: Mapa de calor -->
+                <!-- Fila 4 -->
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:orientation="horizontal">
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
@@ -197,47 +187,97 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- ─── Precio ─────────────────────────────────────────────────────── -->
-        <TextView
+        <!-- ─── SECCIÓN FREE: precio + botón activar ─────────────────────── -->
+        <LinearLayout
+            android:id="@+id/layoutSubscribe"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="S/. 4.50 / mes"
-            android:textSize="32sp"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF"
-            android:gravity="center"
-            android:layout_marginBottom="4dp"/>
+            android:orientation="vertical"
+            android:visibility="visible">
 
-        <TextView
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="S/. 4.50 / mes"
+                android:textSize="32sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:gravity="center"
+                android:layout_marginBottom="4dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Cancela cuando quieras"
+                android:textSize="13sp"
+                android:textColor="#AAAAAA"
+                android:gravity="center"
+                android:layout_marginBottom="24dp"/>
+
+            <Button
+                android:id="@+id/btnSubscribe"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="⭐ Activar Premium — S/. 4.50 / mes"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="#1A1A2E"
+                android:backgroundTint="#FFD700"
+                android:layout_marginBottom="12dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="⚠️ Versión demo — el pago es simulado"
+                android:textSize="11sp"
+                android:textColor="#666666"
+                android:gravity="center"
+                android:layout_marginBottom="32dp"/>
+
+        </LinearLayout>
+
+        <!-- ─── SECCIÓN PREMIUM: cancelar suscripción ────────────────────── -->
+        <!-- Solo visible cuando plan == "premium" -->
+        <LinearLayout
+            android:id="@+id/layoutCancelPremium"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Cancela cuando quieras"
-            android:textSize="13sp"
-            android:textColor="#AAAAAA"
-            android:gravity="center"
-            android:layout_marginBottom="24dp"/>
+            android:orientation="vertical"
+            android:visibility="gone">
 
-        <!-- ─── Botón suscribirse ──────────────────────────────────────────── -->
-        <Button
-            android:id="@+id/btnSubscribe"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="⭐ Activar Premium — S/. 4.50 / mes"
-            android:textSize="15sp"
-            android:textStyle="bold"
-            android:textColor="#1A1A2E"
-            android:backgroundTint="#FFD700"
-            android:layout_marginBottom="12dp"/>
+            <TextView
+                android:id="@+id/tvRenewalInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:gravity="center"
+                android:text="Tu plan se renueva automáticamente cada mes"
+                android:textColor="#AAAAAA"
+                android:textSize="12sp" />
 
-        <!-- Nota de demo -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="⚠️ Versión demo — el pago es simulado"
-            android:textSize="11sp"
-            android:textColor="#666666"
-            android:gravity="center"
-            android:layout_marginBottom="32dp"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCancelPremium"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="Cancelar suscripción"
+                android:textColor="#FF5252"
+                android:textSize="13sp"
+                app:backgroundTint="#00000000"
+                app:strokeColor="#FF5252"
+                app:strokeWidth="1dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="32dp"
+                android:gravity="center"
+                android:text="Mantendrás Premium hasta fin del período actual"
+                android:textColor="#555577"
+                android:textSize="10sp" />
+
+        </LinearLayout>
 
     </LinearLayout>
 </ScrollView>

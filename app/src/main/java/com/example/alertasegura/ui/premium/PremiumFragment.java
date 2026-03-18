@@ -7,13 +7,12 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
-import com.example.alertasegura.R;
 import com.example.alertasegura.databinding.FragmentPremiumBinding;
 import com.example.alertasegura.util.Constants;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -66,40 +65,40 @@ public class PremiumFragment extends Fragment {
 
     private void updateUIForPlan() {
         if (Constants.PLAN_PREMIUM.equals(currentPlan)) {
-            // Ya es Premium
-            binding.btnSubscribe.setText("✅ Ya eres Premium");
-            binding.btnSubscribe.setEnabled(false);
-            binding.tvPremiumStatus.setText("Tu plan Premium está activo");
-            binding.tvPremiumStatus.setVisibility(View.VISIBLE);
+            // Usuario Premium: badge activo, ocultar suscribirse, mostrar cancelar
+            binding.badgePremiumActive.setVisibility(View.VISIBLE);
+            binding.layoutSubscribe.setVisibility(View.GONE);
+            binding.layoutCancelPremium.setVisibility(View.VISIBLE);
         } else {
-            // Plan free
-            binding.btnSubscribe.setText("⭐ Activar Premium — S/. 9.90 / mes");
-            binding.btnSubscribe.setEnabled(true);
-            binding.tvPremiumStatus.setVisibility(View.GONE);
+            // Usuario Free: ocultar badge y cancelar, mostrar suscribirse
+            binding.badgePremiumActive.setVisibility(View.GONE);
+            binding.layoutSubscribe.setVisibility(View.VISIBLE);
+            binding.layoutCancelPremium.setVisibility(View.GONE);
         }
     }
 
     // ─── Botones ──────────────────────────────────────────────────────────────
 
     private void setupButtons() {
-        // Botón suscribirse
+        binding.btnBack.setOnClickListener(v ->
+                Navigation.findNavController(requireView()).navigateUp());
+
         binding.btnSubscribe.setOnClickListener(v -> {
             if (Constants.PLAN_PREMIUM.equals(currentPlan)) return;
             showSubscribeConfirmDialog();
         });
 
-        // Botón volver
-        binding.btnBack.setOnClickListener(v ->
-                Navigation.findNavController(requireView()).navigateUp());
+        binding.btnCancelPremium.setOnClickListener(v ->
+                showCancelConfirmDialog());
     }
 
-    // ─── Flujo de suscripción simulado ────────────────────────────────────────
+    // ─── Flujo suscripción ────────────────────────────────────────────────────
 
     private void showSubscribeConfirmDialog() {
-        new AlertDialog.Builder(requireContext())
+        new MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Activar Plan Premium")
                 .setMessage(
-                        "Plan Premium — S/. 9.90 / mes\n\n" +
+                        "Plan Premium — S/. 4.50 / mes\n\n" +
                                 "✅ 10 alertas comunitarias por día\n" +
                                 "✅ Hasta 10 contactos de confianza\n" +
                                 "✅ Historial de 90 días\n" +
@@ -111,12 +110,6 @@ public class PremiumFragment extends Fragment {
                 .show();
     }
 
-    /**
-     * Simula la activación del plan Premium:
-     * - Actualiza plan = "premium" en Firestore
-     * - Sube el límite de alertas a ALERT_LIMIT_PREMIUM
-     * - Actualiza la UI
-     */
     private void activatePremium() {
         var user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) return;
@@ -125,9 +118,8 @@ public class PremiumFragment extends Fragment {
         binding.btnSubscribe.setText("Activando...");
 
         Map<String, Object> updates = new HashMap<>();
-        updates.put("plan",        Constants.PLAN_PREMIUM);
-        updates.put("alertsLimit", Constants.ALERT_LIMIT_PREMIUM);
-        // Reiniciar el contador del día al subir de plan
+        updates.put("plan",           Constants.PLAN_PREMIUM);
+        updates.put("alertsLimit",    Constants.ALERT_LIMIT_PREMIUM);
         updates.put("alertsToday",    0);
         updates.put("lastAlertReset", System.currentTimeMillis());
 
@@ -141,7 +133,7 @@ public class PremiumFragment extends Fragment {
                 })
                 .addOnFailureListener(e -> {
                     binding.btnSubscribe.setEnabled(true);
-                    binding.btnSubscribe.setText("⭐ Activar Premium — S/. 9.90 / mes");
+                    binding.btnSubscribe.setText("⭐ Activar Premium — S/. 4.50 / mes");
                     Snackbar.make(binding.getRoot(),
                             "Error al activar Premium: " + e.getMessage(),
                             Snackbar.LENGTH_LONG).show();
@@ -149,7 +141,7 @@ public class PremiumFragment extends Fragment {
     }
 
     private void showSuccessDialog() {
-        new AlertDialog.Builder(requireContext())
+        new MaterialAlertDialogBuilder(requireContext())
                 .setTitle("⭐ ¡Bienvenido a Premium!")
                 .setMessage(
                         "Tu plan Premium está activo.\n\n" +
@@ -162,6 +154,47 @@ public class PremiumFragment extends Fragment {
                         Navigation.findNavController(requireView()).navigateUp())
                 .setCancelable(false)
                 .show();
+    }
+
+    // ─── Flujo cancelación ────────────────────────────────────────────────────
+
+    private void showCancelConfirmDialog() {
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Cancelar Premium")
+                .setMessage(
+                        "¿Seguro que quieres cancelar?\n\n" +
+                                "Mantendrás los beneficios Premium hasta el fin del período actual.")
+                .setPositiveButton("Sí, cancelar", (d, w) -> cancelPremium())
+                .setNegativeButton("No", null)
+                .show();
+    }
+
+    private void cancelPremium() {
+        var user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) return;
+
+        binding.btnCancelPremium.setEnabled(false);
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("plan",        Constants.PLAN_FREE);
+        updates.put("alertsLimit", Constants.ALERT_LIMIT_FREE);
+
+        db.collection(Constants.COLLECTION_USERS)
+                .document(user.getUid())
+                .update(updates)
+                .addOnSuccessListener(unused -> {
+                    currentPlan = Constants.PLAN_FREE;
+                    updateUIForPlan();
+                    Snackbar.make(binding.getRoot(),
+                            "Suscripción cancelada. Gracias por usar Premium.",
+                            Snackbar.LENGTH_LONG).show();
+                })
+                .addOnFailureListener(e -> {
+                    binding.btnCancelPremium.setEnabled(true);
+                    Snackbar.make(binding.getRoot(),
+                            "Error al cancelar: " + e.getMessage(),
+                            Snackbar.LENGTH_LONG).show();
+                });
     }
 
     @Override

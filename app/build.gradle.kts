@@ -66,4 +66,6 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
 
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    implementation("com.google.android.material:material:1.11.0")
 }
