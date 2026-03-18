@@ -96,6 +96,7 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:text="Iniciar sesión"
+        android:textColor="#FFFFFF"
         android:textSize="16sp"
         android:backgroundTint="#1A3A5C"
         app:layout_constraintTop_toBottomOf="@id/progressBar"
