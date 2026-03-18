@@ -41,10 +41,12 @@
             android:id="@+id/tilFullName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Nombre completo"
+            android:enabled="false"
+            android:hint="Se completa automáticamente con tu DNI"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             app:layout_constraintTop_toBottomOf="@id/tvSubtitle"
             app:layout_constraintStart_toStartOf="parent"
+
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginTop="28dp">
 

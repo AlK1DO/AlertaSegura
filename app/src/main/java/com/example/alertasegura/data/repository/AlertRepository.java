@@ -109,10 +109,17 @@ public class AlertRepository {
         GeoPoint exact  = new GeoPoint(lat, lng);
         GeoPoint approx = offsetLocation(lat, lng, Constants.APPROX_RADIUS_METERS);
 
+        // Nombre corto para el feed público → "Juan Pérez"
+        // Nombre completo queda en Firestore → solo visible para admin
+        String shortName = getShortName(senderName);
+
+        // DNI enmascarado para el feed público → "7XXXX321"
+        String maskedDni = maskDni(senderDni);
+
         Alert alert = new Alert(uid, senderName, senderDni, exact, approx);
         alert.setNotifiedContacts(notifiedContactUids);
 
-        // 1. Guardar alerta en Firestore
+        // 1. Guardar alerta en Firestore (con nombre y DNI completos para trazabilidad)
         db.collection(Constants.COLLECTION_ALERTS)
                 .add(alert)
                 .addOnSuccessListener(docRef -> {
@@ -130,11 +137,12 @@ public class AlertRepository {
                             .document(uid)
                             .update(counterUpdate);
 
-                    // 3. Publicar en Realtime Database (feed comunitario en tiempo real)
+                    // 3. Publicar en Realtime Database con nombre corto y DNI enmascarado
+                    //    El feed público NUNCA recibe nombre completo ni DNI real
                     Map<String, Object> rtEntry = new HashMap<>();
                     rtEntry.put("alertId",    alertId);
-                    rtEntry.put("senderName", senderName);
-                    rtEntry.put("senderDni",  senderDni);
+                    rtEntry.put("senderName", shortName);  // "Juan Pérez" no "PÉREZ QUISPE JUAN CARLOS"
+                    rtEntry.put("senderDni",  maskedDni);  // "7XXXX321" no "74561234"
                     rtEntry.put("approxLat",  approx.getLatitude());
                     rtEntry.put("approxLng",  approx.getLongitude());
                     rtEntry.put("timestamp",  alert.getTimestamp());
@@ -230,6 +238,37 @@ public class AlertRepository {
     }
 
     // ─── Helpers ──────────────────────────────────────────────────────────────
+
+    /**
+     * RENIEC devuelve: APELLIDO1 APELLIDO2 NOMBRE1 NOMBRE2
+     * Este método extrae solo NOMBRE1 + APELLIDO1 para el feed público.
+     *
+     * Ejemplos:
+     *   "PÉREZ QUISPE JUAN CARLOS" → "Juan Pérez"
+     *   "GARCIA LOPEZ MARIA"       → "Maria Garcia"
+     *   "FLORES ANA"               → "Ana Flores"
+     */
+    private String getShortName(String fullName) {
+        if (fullName == null || fullName.isEmpty()) return "Usuario";
+        String[] parts = fullName.trim().split("\\s+");
+        if (parts.length == 1) return capitalize(parts[0]);
+        if (parts.length == 2) return capitalize(parts[1]) + " " + capitalize(parts[0]);
+        return capitalize(parts[2]) + " " + capitalize(parts[0]);
+    }
+
+    private String capitalize(String word) {
+        if (word == null || word.isEmpty()) return "";
+        return word.charAt(0) + word.substring(1).toLowerCase();
+    }
+
+    /**
+     * Enmascara el DNI para el feed público.
+     * "74561234" → "7XXXX234"
+     */
+    private String maskDni(String dni) {
+        if (dni == null || dni.length() != 8) return "—";
+        return dni.charAt(0) + "XXXX" + dni.substring(5);
+    }
 
     /**
      * Desplaza una coordenada por un radio aleatorio de hasta `radiusMeters`

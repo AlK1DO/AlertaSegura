@@ -26,4 +26,9 @@
         android:icon="@android:drawable/ic_menu_mapmode"
         android:title="Mapa"/>
 
+    <item
+        android:id="@+id/profileFragment"
+        android:icon="@android:drawable/ic_menu_myplaces"
+        android:title="Perfil"/>
+
 </menu>

@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/layout/fragment_profile.xml -->
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1A1A2E">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- ─── Título ─────────────────────────────────────────────────────── -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mi Perfil"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- ─── Plan actual ────────────────────────────────────────────────── -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="#252545"
+            android:layout_marginBottom="20dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/tvCurrentPlan"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Plan gratuito — 2 alertas / día"
+                    android:textSize="14sp"
+                    android:textColor="#AAAAAA"/>
+
+                <TextView
+                    android:id="@+id/btnUpgradeToPremium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="⭐ Mejorar"
+                    android:textSize="13sp"
+                    android:textColor="#1A1A2E"
+                    android:textStyle="bold"
+                    android:background="@drawable/badge_premium"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp"/>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- ─── Datos de identidad (todos solo lectura) ─────────────────────── -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="DATOS DE IDENTIDAD"
+            android:textSize="11sp"
+            android:textColor="#666688"
+            android:textStyle="bold"
+            android:letterSpacing="0.1"
+            android:layout_marginBottom="12dp"/>
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp"
+            app:cardBackgroundColor="#252545"
+            android:layout_marginBottom="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Nombre completo (privado) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Nombre completo"
+                            android:textSize="12sp"
+                            android:textColor="#AAAAAA"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Solo tú lo ves"
+                            android:textSize="10sp"
+                            android:textColor="#555577"/>
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tvFullNameReadOnly"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="—"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="#FFFFFF"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=" 🔒"
+                        android:textSize="14sp"/>
+                </LinearLayout>
+
+                <!-- Divisor -->
+                <View android:layout_width="match_parent" android:layout_height="1dp"
+                    android:background="#333355" android:layout_marginBottom="12dp"/>
+
+                <!-- Nombre en comunidad (nombre corto) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Nombre en comunidad"
+                            android:textSize="12sp"
+                            android:textColor="#AAAAAA"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Visible en el feed público"
+                            android:textSize="10sp"
+                            android:textColor="#555577"/>
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tvShortNameReadOnly"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="—"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="#4FC3F7"/>
+
+                </LinearLayout>
+
+                <!-- Divisor -->
+                <View android:layout_width="match_parent" android:layout_height="1dp"
+                    android:background="#333355" android:layout_marginBottom="12dp"/>
+
+                <!-- DNI enmascarado -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="DNI"
+                            android:textSize="12sp"
+                            android:textColor="#AAAAAA"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Verificado en RENIEC"
+                            android:textSize="10sp"
+                            android:textColor="#555577"/>
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tvDniReadOnly"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="—"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="#FFFFFF"
+                        android:fontFamily="monospace"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=" 🔒"
+                        android:textSize="14sp"/>
+                </LinearLayout>
+
+                <!-- Divisor -->
+                <View android:layout_width="match_parent" android:layout_height="1dp"
+                    android:background="#333355" android:layout_marginBottom="12dp"/>
+
+                <!-- Teléfono -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Teléfono"
+                            android:textSize="12sp"
+                            android:textColor="#AAAAAA"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Vinculado a tu cuenta"
+                            android:textSize="10sp"
+                            android:textColor="#555577"/>
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tvPhoneReadOnly"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="—"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="#FFFFFF"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=" 🔒"
+                        android:textSize="14sp"/>
+                </LinearLayout>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Nota explicativa -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🔒 Estos datos se verificaron al registrarte y no pueden modificarse. Son el ancla de tu identidad en el sistema."
+            android:textSize="12sp"
+            android:textColor="#555577"
+            android:layout_marginBottom="28dp"/>
+
+        <!-- ─── Cerrar sesión ───────────────────────────────────────────────── -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSignOut"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="Cerrar sesión"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:backgroundTint="#B71C1C"
+            android:layout_marginBottom="32dp"/>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

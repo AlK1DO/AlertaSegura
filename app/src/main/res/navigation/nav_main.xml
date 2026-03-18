@@ -9,7 +9,16 @@
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.example.alertasegura.ui.home.HomeFragment"
-        android:label="Inicio"/>
+        android:label="Inicio">
+        <!-- Desde home se puede ir a Premium cuando se agota el límite -->
+        <action
+            android:id="@+id/action_home_to_premium"
+            app:destination="@id/premiumFragment"
+            app:enterAnim="@anim/slide_in_up"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/slide_out_down"/>
+    </fragment>
 
     <fragment
         android:id="@+id/contactsFragment"
@@ -25,5 +34,24 @@
         android:id="@+id/mapFragment"
         android:name="com.example.alertasegura.ui.map.MapFragment"
         android:label="Mapa"/>
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.example.alertasegura.ui.profile.ProfileFragment"
+        android:label="Perfil">
+        <action
+            android:id="@+id/action_profile_to_premium"
+            app:destination="@id/premiumFragment"
+            app:enterAnim="@anim/slide_in_up"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/slide_out_down"/>
+    </fragment>
+
+    <!-- Pantalla Premium: accesible desde Home y Perfil -->
+    <fragment
+        android:id="@+id/premiumFragment"
+        android:name="com.example.alertasegura.ui.premium.PremiumFragment"
+        android:label="Premium"/>
 
 </navigation>

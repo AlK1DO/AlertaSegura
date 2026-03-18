@@ -94,6 +94,11 @@ public class HomeFragment extends Fragment {
         setupSosButton();
         setupRingAnimation();
         contactViewModel.loadContacts();
+
+        // ─── Navegación a Premium ─────────────────────────────────────────────
+        binding.btnGoToPremium.setOnClickListener(v ->
+                Navigation.findNavController(requireView())
+                        .navigate(R.id.action_home_to_premium));
     }
 
     // ─── Setup ────────────────────────────────────────────────────────────────

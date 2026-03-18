@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/layout/fragment_premium.xml -->
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1A1A2E"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- ─── Botón volver ───────────────────────────────────────────────── -->
+        <TextView
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="← Volver"
+            android:textColor="#AAAAAA"
+            android:textSize="14sp"
+            android:paddingBottom="16dp"/>
+
+        <!-- ─── Header ────────────────────────────────────────────────────── -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="⭐"
+            android:textSize="48sp"
+            android:gravity="center"
+            android:layout_marginTop="8dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Alerta Segura Premium"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:textColor="#FFD700"
+            android:gravity="center"
+            android:layout_marginTop="8dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Más protección, más tranquilidad"
+            android:textSize="14sp"
+            android:textColor="#AAAAAA"
+            android:gravity="center"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="28dp"/>
+
+        <!-- ─── Estado plan actual ─────────────────────────────────────────── -->
+        <TextView
+            android:id="@+id/tvPremiumStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tu plan Premium está activo"
+            android:textSize="14sp"
+            android:textColor="#4CAF50"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:visibility="gone"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- ─── Tabla comparativa Free vs Premium ──────────────────────────── -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="#252545"
+            android:layout_marginBottom="20dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <!-- Encabezado tabla -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="12dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:text="Beneficio"
+                        android:textColor="#AAAAAA"
+                        android:textSize="12sp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Free"
+                        android:textColor="#AAAAAA"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:gravity="center"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Premium"
+                        android:textColor="#FFD700"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:gravity="center"/>
+                </LinearLayout>
+
+                <!-- Divisor -->
+                <View android:layout_width="match_parent" android:layout_height="1dp"
+                    android:background="#333355" android:layout_marginBottom="12dp"/>
+
+                <!-- Fila 1: Alertas comunitarias -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:layout_marginBottom="14dp">
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="2" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="🔔 Alertas al feed" android:textColor="#FFFFFF" android:textSize="13sp"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="comunitario / día" android:textColor="#AAAAAA" android:textSize="11sp"/>
+                    </LinearLayout>
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:text="2" android:textColor="#AAAAAA"
+                        android:textSize="16sp" android:textStyle="bold" android:gravity="center"/>
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:text="10" android:textColor="#FFD700"
+                        android:textSize="16sp" android:textStyle="bold" android:gravity="center"/>
+                </LinearLayout>
+
+                <!-- Fila 2: Contactos de confianza -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:layout_marginBottom="14dp">
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="2" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="👥 Contactos de" android:textColor="#FFFFFF" android:textSize="13sp"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="confianza" android:textColor="#AAAAAA" android:textSize="11sp"/>
+                    </LinearLayout>
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:text="3" android:textColor="#AAAAAA"
+                        android:textSize="16sp" android:textStyle="bold" android:gravity="center"/>
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:text="10" android:textColor="#FFD700"
+                        android:textSize="16sp" android:textStyle="bold" android:gravity="center"/>
+                </LinearLayout>
+
+                <!-- Fila 3: Historial -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:layout_marginBottom="14dp">
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="2" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="📋 Historial de" android:textColor="#FFFFFF" android:textSize="13sp"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="alertas" android:textColor="#AAAAAA" android:textSize="11sp"/>
+                    </LinearLayout>
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:text="7 días" android:textColor="#AAAAAA"
+                        android:textSize="13sp" android:textStyle="bold" android:gravity="center"/>
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:text="90 días" android:textColor="#FFD700"
+                        android:textSize="13sp" android:textStyle="bold" android:gravity="center"/>
+                </LinearLayout>
+
+                <!-- Fila 4: Mapa de calor -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="2" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="🗺️ Radio mapa de" android:textColor="#FFFFFF" android:textSize="13sp"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="calor" android:textColor="#AAAAAA" android:textSize="11sp"/>
+                    </LinearLayout>
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:text="5 km" android:textColor="#AAAAAA"
+                        android:textSize="13sp" android:textStyle="bold" android:gravity="center"/>
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:text="50 km" android:textColor="#FFD700"
+                        android:textSize="13sp" android:textStyle="bold" android:gravity="center"/>
+                </LinearLayout>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- ─── Precio ─────────────────────────────────────────────────────── -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="S/. 4.50 / mes"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:gravity="center"
+            android:layout_marginBottom="4dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Cancela cuando quieras"
+            android:textSize="13sp"
+            android:textColor="#AAAAAA"
+            android:gravity="center"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- ─── Botón suscribirse ──────────────────────────────────────────── -->
+        <Button
+            android:id="@+id/btnSubscribe"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="⭐ Activar Premium — S/. 4.50 / mes"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="#1A1A2E"
+            android:backgroundTint="#FFD700"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Nota de demo -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="⚠️ Versión demo — el pago es simulado"
+            android:textSize="11sp"
+            android:textColor="#666666"
+            android:gravity="center"
+            android:layout_marginBottom="32dp"/>
+
+    </LinearLayout>
+</ScrollView>
