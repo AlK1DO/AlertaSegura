@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- res/layout/fragment_register.xml -->
-<androidx.core.widget.NestedScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -17,24 +16,24 @@
             android:id="@+id/tvTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="48dp"
             android:text="Crear cuenta"
+            android:textColor="#FFFFFF"
             android:textSize="28sp"
             android:textStyle="bold"
-            android:textColor="#FFFFFF"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginTop="48dp"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/tvSubtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
             android:text="Completa tus datos para continuar"
-            android:textSize="14sp"
             android:textColor="#FFFFFF"
-            app:layout_constraintTop_toBottomOf="@id/tvTitle"
+            android:textSize="14sp"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginTop="4dp"/>
+            app:layout_constraintTop_toBottomOf="@id/tvTitle" />
 
         <!-- Nombre completo -->
         <com.google.android.material.textfield.TextInputLayout
@@ -46,6 +45,7 @@
             android:enabled="false"
             android:hint="Se completa automáticamente con tu DNI"
 
+            android:textColorHint="#91000000"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvSubtitle">
@@ -54,8 +54,6 @@
                 android:id="@+id/etFullName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#FFFFFF"
-                tools:ignore="MissingDefaultResource"
                 android:background="#FFFFFF"
                 android:imeOptions="actionNext"
                 android:inputType="textPersonName|textCapWords" />
@@ -69,6 +67,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:hint="DNI / Documento de identidad"
+            android:textColorHint="#91000000"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tilFullName">
@@ -77,8 +76,6 @@
                 android:id="@+id/etDni"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#FFFFFF"
-                tools:ignore="MissingDefaultResource"
                 android:background="#FFFFFF"
                 android:imeOptions="actionNext"
                 android:inputType="number"
@@ -93,6 +90,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:hint="Teléfono (ej: 987654321)"
+            android:textColorHint="#91000000"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tilDni">
@@ -101,8 +99,6 @@
                 android:id="@+id/etPhone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#FFFFFF"
-                tools:ignore="MissingDefaultResource"
                 android:background="#FFFFFF"
                 android:imeOptions="actionNext"
                 android:inputType="phone"
@@ -113,22 +109,21 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilEmail"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:hint="Correo electrónico"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            app:layout_constraintTop_toBottomOf="@id/tilPhone"
-            app:layout_constraintStart_toStartOf="parent"
+            android:textColorHint="#91000000"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="16dp">
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tilPhone">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="#FFFFFF"
-                android:textColor="#FFFFFF"
-                tools:ignore="MissingDefaultResource"
                 android:imeOptions="actionNext"
                 android:inputType="textEmailAddress" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -142,17 +137,17 @@
             android:layout_marginTop="16dp"
             android:background="#FFFFFF"
             android:hint="Contraseña"
+            android:textColorHint="#91000000"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tilEmail"
-            app:passwordToggleEnabled="true">
+            app:passwordToggleEnabled="true"
+            app:passwordToggleTint="#100E0E">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#FFFFFF"
-                tools:ignore="MissingDefaultResource"
                 android:imeOptions="actionNext"
                 android:inputType="textPassword" />
 
@@ -161,23 +156,23 @@
         <!-- Confirmar contraseña -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilConfirmPassword"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:hint="Confirmar contraseña"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            app:passwordToggleEnabled="true"
-            app:layout_constraintTop_toBottomOf="@id/tilPassword"
-            app:layout_constraintStart_toStartOf="parent"
+            android:textColorHint="#91000000"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="16dp">
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tilPassword"
+            app:passwordToggleEnabled="true"
+            app:passwordToggleTint="#100E0E">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etConfirmPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="#FFFFFF"
-                android:textColor="#FFFFFF"
-                tools:ignore="MissingDefaultResource"
                 android:imeOptions="actionDone"
                 android:inputType="textPassword" />
 
@@ -188,11 +183,11 @@
             android:id="@+id/progressBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/tilConfirmPassword"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="16dp"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tilConfirmPassword" />
 
         <!-- Botón Registrar -->
 
@@ -208,12 +203,12 @@
             android:backgroundTint="#1A3A5C"
             android:text="Crear cuenta"
             android:textColor="#FFFFFF"
-            tools:ignore="MissingDefaultResource"
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/progressBar" />
+            app:layout_constraintTop_toBottomOf="@id/progressBar"
+            tools:ignore="MissingDefaultResource" />
 
         <TextView
             android:id="@+id/tvGoToLogin"
@@ -248,7 +243,6 @@
             android:padding="4dp"
             android:text="He leído y acepto los Términos y Condiciones"
             android:textColor="#FFFFFF"
-            tools:ignore="MissingDefaultResource"
             android:textSize="13sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toTopOf="@+id/btnRegister"
@@ -256,7 +250,8 @@
             app:layout_constraintHorizontal_bias="0.741"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tilConfirmPassword"
-            app:layout_constraintVertical_bias="0.58" />
+            app:layout_constraintVertical_bias="0.58"
+            tools:ignore="MissingDefaultResource" />
 
         <!-- Enlace para ver los términos completos -->
 
