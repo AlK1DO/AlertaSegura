@@ -26,7 +26,6 @@ import androidx.navigation.Navigation;
 
 import com.example.alertasegura.R;
 import com.example.alertasegura.data.model.Contact;
-import com.example.alertasegura.data.model.User;
 import com.example.alertasegura.databinding.FragmentHomeBinding;
 import com.example.alertasegura.util.WhatsAppHelper;
 import com.example.alertasegura.viewmodel.AlertViewModel;
@@ -40,10 +39,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 public class HomeFragment extends Fragment {
 
@@ -58,11 +55,15 @@ public class HomeFragment extends Fragment {
     private List<Contact> trustedContacts = new ArrayList<>();
 
     // ─── Estado del límite diario ─────────────────────────────────────────────
-    private int  alertsToday     = 0;
-    private int  alertsLimit     = 2;   // default para usuario free
-    private long lastAlertReset  = 0;
+    private int  alertsToday    = 0;
+    private int  alertsLimit    = 2;
+    private long lastAlertReset = 0;
 
     private ObjectAnimator ringPulse;
+
+    // ─── FIX 2: Handler centralizado para cancelar postDelayed al destruir ────
+    private final Handler        whatsappHandler   = new Handler(Looper.getMainLooper());
+    private final List<Runnable> whatsappRunnables = new ArrayList<>();
 
     private final ActivityResultLauncher<String> locationPermLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
@@ -95,7 +96,6 @@ public class HomeFragment extends Fragment {
         setupRingAnimation();
         contactViewModel.loadContacts();
 
-        // ─── Navegación a Premium ─────────────────────────────────────────────
         binding.btnGoToPremium.setOnClickListener(v ->
                 Navigation.findNavController(requireView())
                         .navigate(R.id.action_home_to_premium));
@@ -116,18 +116,15 @@ public class HomeFragment extends Fragment {
                     senderDni  = snap.getString("dni")      != null ? snap.getString("dni")      : "";
                     binding.tvUserName.setText(senderName.isEmpty() ? user.getEmail() : senderName);
 
-                    // ── Cargar estado del límite diario desde Firestore ──────
-                    Long storedAlertsToday    = snap.getLong("alertsToday");
-                    Long storedAlertsLimit    = snap.getLong("alertsLimit");
-                    Long storedLastReset      = snap.getLong("lastAlertReset");
+                    Long storedAlertsToday = snap.getLong("alertsToday");
+                    Long storedAlertsLimit = snap.getLong("alertsLimit");
+                    Long storedLastReset   = snap.getLong("lastAlertReset");
 
-                    alertsToday    = storedAlertsToday  != null ? storedAlertsToday.intValue()  : 0;
-                    alertsLimit    = storedAlertsLimit  != null ? storedAlertsLimit.intValue()   : 2;
-                    lastAlertReset = storedLastReset    != null ? storedLastReset                : System.currentTimeMillis();
+                    alertsToday    = storedAlertsToday != null ? storedAlertsToday.intValue() : 0;
+                    alertsLimit    = storedAlertsLimit != null ? storedAlertsLimit.intValue()  : 2;
+                    lastAlertReset = storedLastReset   != null ? storedLastReset               : System.currentTimeMillis();
 
-                    // Si ya pasó la medianoche, reiniciar contador localmente
                     checkAndResetDailyCounter();
-
                     updateAlertCounterUI();
                 });
     }
@@ -139,21 +136,22 @@ public class HomeFragment extends Fragment {
                 setAlertActive(true);
                 String time = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
                 binding.tvLastAlertStatus.setText("⚠️ Alerta activa desde las " + time);
+
+                // FIX 1: El repositorio YA incrementó en Firestore.
+                // Aquí solo actualizamos la variable local para reflejar en UI.
+                // NO llamar updateAlertCountInFirestore() — evita el doble conteo.
+                alertsToday++;
+                updateAlertCounterUI();
             }
         });
 
-
         alertViewModel.errorLiveData.observe(getViewLifecycleOwner(), error -> {
             if (error == null || error.isEmpty()) return;
-
             if ("LIMIT_REACHED".equals(error)) {
-                // Si el repositorio manda este código, abrimos tu diálogo
                 showLimitReachedDialog();
             } else {
-                // Para cualquier otro error (ej: "Error de red"), mostramos el Snackbar
                 Snackbar.make(binding.getRoot(), error, Snackbar.LENGTH_LONG).show();
             }
-            // Limpiamos para evitar que se repita al rotar la pantalla
             alertViewModel.errorLiveData.setValue(null);
         });
 
@@ -182,7 +180,6 @@ public class HomeFragment extends Fragment {
     // ─── Flujo SOS ────────────────────────────────────────────────────────────
 
     private void checkPermissionAndSend() {
-        // ── 1. Verificar límite diario ANTES de cualquier otra cosa ──────────
         checkAndResetDailyCounter();
 
         if (alertsToday >= alertsLimit) {
@@ -190,11 +187,10 @@ public class HomeFragment extends Fragment {
             return;
         }
 
-        // ── 2. Verificar contactos ───────────────────────────────────────────
         if (trustedContacts.isEmpty()) {
             new AlertDialog.Builder(requireContext())
                     .setTitle("Sin contactos de confianza")
-                    .setMessage("Primero agrega al menos un contacto de confianza en la pestaña Contactos. Ellos recibirán tu ubicación cuando actives SOS.")
+                    .setMessage("Primero agrega al menos un contacto de confianza en la pestaña Contactos.")
                     .setPositiveButton("Ir a Contactos", (d, w) ->
                             Navigation.findNavController(requireView())
                                     .navigate(R.id.contactsFragment))
@@ -203,7 +199,6 @@ public class HomeFragment extends Fragment {
             return;
         }
 
-        // ── 3. Verificar permiso de ubicación ────────────────────────────────
         if (ContextCompat.checkSelfPermission(requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             locationPermLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
@@ -215,11 +210,10 @@ public class HomeFragment extends Fragment {
     @SuppressLint("MissingPermission")
     private void getLocationAndSend() {
         Snackbar.make(binding.getRoot(), "Obteniendo ubicación...", Snackbar.LENGTH_SHORT).show();
-
         fusedLocation.getLastLocation().addOnSuccessListener(location -> {
             if (location == null) {
                 Snackbar.make(binding.getRoot(),
-                        "No se pudo obtener la ubicación. Activa el GPS e inténtalo de nuevo.",
+                        "No se pudo obtener la ubicación. Activa el GPS.",
                         Snackbar.LENGTH_LONG).show();
                 return;
             }
@@ -231,83 +225,52 @@ public class HomeFragment extends Fragment {
         double lat = location.getLatitude();
         double lng = location.getLongitude();
 
-        // 1. Guardar en Firestore → dispara Cloud Function → FCM a contactos con la app
+        // 1. Enviar al repositorio — ÉL es el único que incrementa en Firestore
         List<String> uids = new ArrayList<>();
         for (Contact c : trustedContacts) uids.add(c.getContactUid());
         alertViewModel.sendSosAlert(senderName, senderDni, location, uids);
 
-        // 2. Incrementar contador local y actualizar en Firestore
-        alertsToday++;
-        updateAlertCountInFirestore();
-        updateAlertCounterUI();
-
-        // 3. Abrir WhatsApp para cada contacto de confianza, uno a uno
-        //    (WhatsApp NO consume el límite, solo el feed comunitario)
-        Handler handler = new Handler(Looper.getMainLooper());
+        // 2. WhatsApp con Runnables cancelables
+        cancelPendingWhatsappMessages();
         for (int i = 0; i < trustedContacts.size(); i++) {
             Contact contact = trustedContacts.get(i);
             long delay = i * 2000L;
-            handler.postDelayed(() ->
-                            WhatsAppHelper.openWhatsAppSos(
-                                    requireContext(),
-                                    contact.getPhone(),
-                                    senderName,
-                                    lat,
-                                    lng),
-                    delay);
+            Runnable r = () -> {
+                if (!isAdded() || binding == null) return; // fragment ya destruido
+                WhatsAppHelper.openWhatsAppSos(
+                        requireContext(), contact.getPhone(), senderName, lat, lng);
+            };
+            whatsappRunnables.add(r);
+            whatsappHandler.postDelayed(r, delay);
         }
+    }
+
+    // ─── Cancelar Runnables pendientes ───────────────────────────────────────
+
+    private void cancelPendingWhatsappMessages() {
+        for (Runnable r : whatsappRunnables) whatsappHandler.removeCallbacks(r);
+        whatsappRunnables.clear();
     }
 
     // ─── Límite diario ────────────────────────────────────────────────────────
 
-    /**
-     * Reinicia el contador si ya pasó la medianoche desde el último reset.
-     */
     private void checkAndResetDailyCounter() {
-        long now          = System.currentTimeMillis();
-        long millisInDay  = 24 * 60 * 60 * 1000L;
-
+        long now         = System.currentTimeMillis();
+        long millisInDay = 24 * 60 * 60 * 1000L;
         if (now - lastAlertReset >= millisInDay) {
             alertsToday    = 0;
             lastAlertReset = now;
-            updateAlertCountInFirestore(); // sincronizar el reset con Firestore
         }
     }
 
-    /**
-     * Persiste el contador actualizado en Firestore.
-     */
-    private void updateAlertCountInFirestore() {
-        var firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (firebaseUser == null) return;
-
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("alertsToday",    alertsToday);
-        updates.put("alertsLimit",    alertsLimit);
-        updates.put("lastAlertReset", lastAlertReset);
-
-        FirebaseFirestore.getInstance()
-                .collection("users")
-                .document(firebaseUser.getUid())
-                .update(updates);
-        // No se necesita callback: si falla, la Cloud Function lo validará igual
-    }
-
-    /**
-     * Muestra el diálogo cuando el usuario ya agotó sus alertas del día.
-     */
     private void showLimitReachedDialog() {
-        int remaining = Math.max(0, alertsLimit - alertsToday);
-
         new AlertDialog.Builder(requireContext())
                 .setTitle("Límite diario alcanzado")
                 .setMessage(
                         "Has usado tus " + alertsLimit + " alertas comunitarias de hoy.\n\n" +
                                 "⚠️ Tu contador se reinicia a medianoche.\n\n" +
-                                "💡 Recuerda: puedes seguir enviando tu ubicación a tus contactos de confianza " +
-                                "por WhatsApp sin límite.")
+                                "💡 Puedes seguir enviando tu ubicación por WhatsApp sin límite.")
                 .setPositiveButton("Entendido", null)
-                // Botón secundario: abrir WhatsApp igual, porque la emergencia puede ser real
                 .setNeutralButton("Alertar por WhatsApp", (d, w) -> {
                     if (!trustedContacts.isEmpty()) {
                         if (ContextCompat.checkSelfPermission(requireContext(),
@@ -322,10 +285,6 @@ public class HomeFragment extends Fragment {
                 .show();
     }
 
-    /**
-     * Envía la alerta SOLO por WhatsApp, sin publicar en el feed comunitario.
-     * Se usa cuando el usuario ya agotó su límite diario pero hay una emergencia real.
-     */
     @SuppressLint("MissingPermission")
     private void sendWhatsAppOnlyAlert() {
         fusedLocation.getLastLocation().addOnSuccessListener(location -> {
@@ -337,22 +296,20 @@ public class HomeFragment extends Fragment {
             double lat = location.getLatitude();
             double lng = location.getLongitude();
 
-            Handler handler = new Handler(Looper.getMainLooper());
+            cancelPendingWhatsappMessages();
             for (int i = 0; i < trustedContacts.size(); i++) {
                 Contact contact = trustedContacts.get(i);
                 long delay = i * 2000L;
-                handler.postDelayed(() ->
-                                WhatsAppHelper.openWhatsAppSos(
-                                        requireContext(),
-                                        contact.getPhone(),
-                                        senderName,
-                                        lat,
-                                        lng),
-                        delay);
+                Runnable r = () -> {
+                    if (!isAdded() || binding == null) return;
+                    WhatsAppHelper.openWhatsAppSos(
+                            requireContext(), contact.getPhone(), senderName, lat, lng);
+                };
+                whatsappRunnables.add(r);
+                whatsappHandler.postDelayed(r, delay);
             }
             Snackbar.make(binding.getRoot(),
-                    "Abriendo WhatsApp con tus contactos de confianza...",
-                    Snackbar.LENGTH_LONG).show();
+                    "Abriendo WhatsApp con tus contactos...", Snackbar.LENGTH_LONG).show();
         });
     }
 
@@ -374,22 +331,16 @@ public class HomeFragment extends Fragment {
 
     // ─── UI helpers ───────────────────────────────────────────────────────────
 
-    /**
-     * Actualiza el indicador de alertas restantes en el home.
-     * Ejemplo: "🔔 Alertas hoy: 1 / 2"
-     */
     private void updateAlertCounterUI() {
         if (binding == null) return;
+        if (activeAlertId != null) return;
         int remaining = Math.max(0, alertsLimit - alertsToday);
-        if (activeAlertId != null) return; // no pisar el estado de alerta activa
-
         if (remaining == 0) {
             binding.tvAlertCounter.setText("🔕 Sin alertas comunitarias restantes hoy");
-            binding.tvAlertCounter.setVisibility(View.VISIBLE);
         } else {
             binding.tvAlertCounter.setText("🔔 Alertas comunitarias hoy: " + alertsToday + " / " + alertsLimit);
-            binding.tvAlertCounter.setVisibility(View.VISIBLE);
         }
+        binding.tvAlertCounter.setVisibility(View.VISIBLE);
     }
 
     private void updateContactsHint() {
@@ -418,6 +369,7 @@ public class HomeFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        cancelPendingWhatsappMessages(); // FIX 2: limpiar callbacks al destruir
         if (ringPulse != null) ringPulse.cancel();
         binding = null;
     }
