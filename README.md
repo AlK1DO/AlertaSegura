@@ -11,16 +11,6 @@
   <img src="https://img.shields.io/badge/Status-Activo-2ecc71?style=for-the-badge">
 </p>
 
----
-
-## Vista General
-
-Sistema web diseñado para la gestión y venta de productos tecnológicos. Permite a los usuarios navegar por un catálogo dinámico, realizar compras y administrar sus pedidos de forma eficiente.
-
-Incluye un panel administrativo con métricas en tiempo real y control de acceso basado en roles.
-
----
-
 ## Descripción
 
 Sistema web de gestión y venta de productos tecnológicos desarrollado con React y Firebase. Permite a los usuarios explorar un catálogo de productos (laptops, PCs, periféricos, monitores, accesorios y almacenamiento), realizar compras y gestionar sus pedidos de forma intuitiva.
