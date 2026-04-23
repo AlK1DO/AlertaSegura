@@ -1,49 +1,61 @@
-# Sistema de Gestión de Productos Tecnológicos
+<h1 align="center">Sistema de Gestión de Productos Tecnológicos</h1>
+
+<p align="center">
+  Sistema e-commerce con panel de inventario y análisis en tiempo real
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/React-Frontend-blue?style=for-the-badge&logo=react">
+  <img src="https://img.shields.io/badge/Firebase-Backend-orange?style=for-the-badge&logo=firebase">
+  <img src="https://img.shields.io/badge/Auth-Google-red?style=for-the-badge&logo=google">
+  <img src="https://img.shields.io/badge/Status-Activo-success?style=for-the-badge">
+</p>
+
+---
 
 ## Descripción
 
-Sistema web de gestión y venta de productos tecnológicos desarrollado con React y Firebase. Permite a los usuarios explorar un catálogo de productos (laptops, PCs, periféricos, monitores, accesorios y almacenamiento), realizar compras y gestionar sus pedidos de forma intuitiva.
+Sistema web para la gestión y venta de productos tecnológicos desarrollado con **React** y **Firebase**. Permite a los usuarios explorar productos, realizar compras y gestionar pedidos de forma eficiente.
 
-El sistema integra un panel de análisis de inventario con métricas en tiempo real y un sistema de roles (usuario y administrador) que permite controlar el acceso a funcionalidades específicas.
-
----
-
-## Objetivos del Sistema
-
-- Facilitar la venta de productos tecnológicos en línea
-- Proporcionar control y monitoreo del inventario
-- Mejorar la experiencia del usuario en el proceso de compra
-- Permitir la gestión eficiente de productos por parte del administrador
+Incluye un **panel de análisis de inventario** con métricas en tiempo real y un sistema de **roles (usuario / administrador)** para el control de funcionalidades.
 
 ---
 
-## Tecnologías Utilizadas
+## Objetivos
+
+- Facilitar la venta de productos tecnológicos en línea  
+- Proporcionar control y monitoreo del inventario  
+- Mejorar la experiencia del usuario en el proceso de compra  
+- Permitir la gestión eficiente de productos  
+
+---
+
+## Stack Tecnológico
 
 | Tecnología | Uso |
 |----------|------|
-| React (JSX) | Desarrollo del frontend |
-| Firebase | Base de datos y backend |
-| Firebase Authentication | Autenticación de usuarios |
-| JavaScript | Lógica del sistema |
-| CSS | Estilos y diseño |
+| React (JSX) | Frontend |
+| Firebase | Base de datos |
+| Firebase Authentication | Autenticación |
+| JavaScript | Lógica |
+| CSS | Estilos |
 
 ---
 
-## Funcionalidades Principales
+## Módulos del Sistema
 
-### Catálogo de Productos
+### Catálogo
 
-- Visualización de productos disponibles
-- Información detallada:
-  - Nombre
+- Visualización de productos
+- Información completa:
   - Precio
   - Stock
-  - Imagen (mediante URL)
+  - Imagen (URL)
   - Descripción
-  - Rating y reseñas
-- Acciones disponibles:
-  - Agregar al carrito
-  - Agregar a favoritos
+  - Rating
+- Acciones:
+  - Añadir al carrito
+  - Añadir a favoritos
 
 ---
 
@@ -51,190 +63,123 @@ El sistema integra un panel de análisis de inventario con métricas en tiempo r
 
 - Gestión dinámica de productos
 - Cálculo automático del total
-- Métodos de pago disponibles:
-  - Tarjeta (Visa / Débito)
-  - Yape
-  - BCP
-  - Scotiabank
+
+**Métodos de pago:**
+- Tarjeta (Visa / Débito)
+- Yape
+- BCP
+- Scotiabank
 
 ---
 
-### Mis Pedidos
+### Pedidos
 
-- Historial completo de compras realizadas
+- Historial de compras
 - Funcionalidades:
-  - Visualización de detalles del pedido
-  - Recompra de productos
-  - Generación de ticket de compra (imprimible)
+  - Ver detalle
+  - Recomprar
+  - Generar ticket imprimible
 
 ---
 
 ### Favoritos
 
-- Lista personalizada de productos marcados por el usuario
-- Acceso rápido a productos de interés
+- Lista personalizada de productos
+- Acceso rápido a productos marcados
 
 ---
 
 ### Notificaciones
 
-Sistema de notificaciones en tiempo real clasificado por categorías:
+Sistema en tiempo real:
 
-- Pedidos
-- Pagos
-- Ofertas
-- Sistema
+| Tipo | Descripción |
+|------|------------|
+| Pedidos | Actualizaciones de compra |
+| Pagos | Confirmaciones |
+| Ofertas | Promociones |
+| Sistema | Eventos generales |
 
-Funciones disponibles:
-- Visualizar todas las notificaciones
-- Filtrar por tipo
+**Acciones disponibles:**
+- Filtrar
 - Marcar como leídas
-- Limpiar historial
-
-Ejemplo:
-> Pago confirmado: Tu pedido fue registrado correctamente.
+- Limpiar
 
 ---
 
-### Perfil de Usuario
+### Perfil
 
-Gestión de información personal:
+Gestión de datos del usuario:
 
 - Foto de perfil
-- Nombre completo
-- Nombre de usuario
-- Correo electrónico
-- Teléfono
+- Información personal
 - Dirección de envío
 
-Información adicional:
+**Extras:**
 - Fecha de registro
-- Total de compras realizadas
+- Total de compras
 
 ---
 
 ### Soporte
 
-- Envío de consultas o incidencias
-- Canal de comunicación con el sistema
+- Envío de consultas
+- Comunicación directa con el sistema
 
 ---
 
-### Panel de Análisis de Inventario
+### Dashboard de Inventario
 
-Dashboard con métricas clave para la toma de decisiones:
+Panel con métricas clave:
 
 - Total de productos
 - Stock total
 - Valor del inventario
-- Productos con stock bajo
-- Transacciones semanales
+- Stock bajo
 - Ventas mensuales
-- Evolución anual de ventas
+- Transacciones semanales
 - Distribución por categorías
-- Top 5 productos más valiosos
-- Estado del inventario
-- Comparativa mensual de ventas
+- Top productos por valor
 
 ---
 
-## Roles del Sistema
+## Roles
 
 ### Usuario
 
-- Explorar catálogo
-- Comprar productos
-- Gestionar carrito
-- Visualizar pedidos
-- Administrar favoritos
-- Editar perfil
+- Explorar productos  
+- Comprar  
+- Gestionar carrito  
+- Ver pedidos  
+- Favoritos  
+- Editar perfil  
 
 ---
 
 ### Administrador
 
-Incluye todas las funcionalidades del usuario, además de:
+Incluye todo lo anterior más:
 
-- Gestión de productos:
-  - Crear
-  - Editar
-  - Eliminar
-- Configuración de productos:
+- CRUD de productos
+- Gestión de:
   - Precio
   - Stock
   - Imagen (URL)
   - Descripción
-  - Rating y reseñas
+  - Rating
 
 ---
 
 ## Estructura del Proyecto
 
-```text
+```bash
 src/
 ├── components/
-│   ├── AuthModal.jsx
-│   ├── AuthSection.jsx
-│   ├── CountUp.jsx
-│   ├── GlareHover.jsx
-│   ├── GradientText.jsx
-│   ├── PaymentMethodsSection.jsx
-│   ├── SpecialOffersSection.jsx
-│   ├── StarBorder.jsx
-│   ├── TextType.jsx
-│   ├── dashboard/
-│   │   ├── BenefitsSection.jsx
-│   │   ├── CtaSection.jsx
-│   │   ├── GuaranteesSection.jsx
-│   │   ├── HeroSection.jsx
-│   │   ├── MetricsSection.jsx
-│   │   ├── StatsSection.jsx
-│   │   └── WelcomeAlert.jsx
-│   └── estadisticas/
-│       ├── CategoriasChart.jsx
-│       ├── InventarioMensualChart.jsx
-│       ├── KpiCards.jsx
-│       ├── ProductosValorChart.jsx
-│       ├── TransaccionesChart.jsx
-│       └── VentasMensualesChart.jsx
 ├── data/
-│   └── productos.json
 ├── hooks/
-│   └── useTheme.js
 ├── pages/
-│   ├── Carrito.jsx
-│   ├── Catalogo.jsx
-│   ├── Dashboard.jsx
-│   ├── Estadisticas.jsx
-│   ├── Favoritos.jsx
-│   ├── MiPerfil.jsx
-│   ├── MisPedidos.jsx
-│   ├── Notificaciones.jsx
-│   ├── Sidebar.jsx
-│   └── Soporte.jsx
 ├── services/
-│   └── statsService.js
 ├── firebase.js
 ├── App.jsx
 ├── main.jsx
 └── index.css
-```
-----------------------------------------------
-
-### Flujo del Sistema
-El usuario accede a la plataforma
-Se autentica (Google o correo electrónico)
-Explora el catálogo de productos
-Agrega productos al carrito
-Realiza el pago
-Se registra el pedido en el sistema
-Recibe una notificación de confirmación
-Puede consultar su historial o generar su ticket
-
-### Consideraciones Técnicas
-Uso de URLs para imágenes para optimizar el almacenamiento en Firebase
-Firebase gestiona:
-Autenticación
-Base de datos
-Arquitectura modular basada en componentes reutilizables
-Separación de lógica mediante servicios (statsService)
